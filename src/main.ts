@@ -179,10 +179,24 @@ const sketch = (p: p5) => {
 
       p.fill(30, 180, 80)
       p.beginShape()
-      for (let j = 0; j < 5; j++) {
+      // 水草の根元
+      const baseY = p.height - 40
+      p.vertex(plantX, baseY)
+      
+      // 水草の曲線
+      for (let j = 1; j < 4; j++) {
         const waveX = p.sin(p.frameCount * 0.02 + j * 0.5) * 15
-        const segmentY = p.height - 40 - (j / 4) * plantHeight
-        p.curveVertex(plantX + waveX, segmentY)
+        const segmentY = baseY - (j / 3) * plantHeight
+        const controlX1 = plantX + waveX
+        const controlY1 = segmentY + plantHeight / 6
+        const controlX2 = plantX + waveX
+        const controlY2 = segmentY - plantHeight / 6
+        
+        p.bezierVertex(
+          controlX1, controlY1,
+          controlX2, controlY2,
+          plantX + waveX, segmentY
+        )
       }
       p.endShape()
     }
