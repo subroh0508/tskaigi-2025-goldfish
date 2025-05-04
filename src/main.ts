@@ -135,8 +135,11 @@ class Goldfish {
   targetY: number;
   size: number;
   direction: number;
+  targetDirection: number;  // 目標とする向き
+  turningSpeed: number;     // 向きの変化速度
   speed: number;
   phaseOffset: number;
+  isTurning: boolean;       // 方向転換中かどうか
 
   constructor(p: p5, x: number, y: number, size: number, direction: number, phaseOffset: number = 0) {
     this.p = p;
@@ -146,8 +149,11 @@ class Goldfish {
     this.targetY = y;
     this.size = size;
     this.direction = direction;
+    this.targetDirection = direction;
+    this.turningSpeed = 0.1;  // 向きの変化速度（調整可能）
     this.speed = p.random(0.01, 0.03);
     this.phaseOffset = phaseOffset;
+    this.isTurning = false;
 
     // 時々新しい目標地点を設定
     setInterval(() => {
@@ -162,36 +168,84 @@ class Goldfish {
 
     // 目標地点が現在の位置の左側なら向きを左に、右側なら向きを右に
     if (this.targetX < this.x) {
-      this.direction = -1;
+      this.targetDirection = -1;
     } else {
-      this.direction = 1;
+      this.targetDirection = 1;
+    }
+
+    // 方向転換が必要な場合は、方向転換中フラグを立てる
+    if (this.targetDirection !== this.direction) {
+      this.isTurning = true;
     }
   }
 
   update(time: number) {
-    // 目標位置に向かって徐々に移動
-    this.x = this.p.lerp(this.x, this.targetX, this.speed);
-    this.y = this.p.lerp(this.y, this.targetY, this.speed);
+    // 方向の更新（滑らかに目標の向きに変化）
+    if (this.direction !== this.targetDirection) {
+      // 現在の向きから目標の向きへ徐々に変化
+      this.direction = this.p.lerp(this.direction, this.targetDirection, this.turningSpeed);
 
-    // 画面端に達した場合は跳ね返る
+      // 十分に近づいたら完全に目標の向きにする
+      if (Math.abs(this.direction - this.targetDirection) < 0.05) {
+        this.direction = this.targetDirection;
+        this.isTurning = false;
+      }
+    }
+
+    // 移動速度（方向転換中は少し遅くする）
+    const currentSpeed = this.isTurning ? this.speed * 0.7 : this.speed;
+
+    // 目標位置に向かって徐々に移動
+    this.x = this.p.lerp(this.x, this.targetX, currentSpeed);
+    this.y = this.p.lerp(this.y, this.targetY, currentSpeed);
+
+    // 画面端に達した場合は滑らかに跳ね返る
     if (this.x < this.size * 0.5) {
       this.x = this.size * 0.5;
-      this.direction = 1;
+      if (this.targetDirection < 0) {
+        // 目標が画面外の場合、目標を画面内に設定し直す
+        this.targetX = this.p.random(this.p.width * 0.2, this.p.width * 0.8);
+        this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.8);
+        this.targetDirection = 1;
+        this.isTurning = true;
+      }
     } else if (this.x > this.p.width - this.size * 0.5) {
       this.x = this.p.width - this.size * 0.5;
-      this.direction = -1;
+      if (this.targetDirection > 0) {
+        // 目標が画面外の場合、目標を画面内に設定し直す
+        this.targetX = this.p.random(this.p.width * 0.2, this.p.width * 0.8);
+        this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.8);
+        this.targetDirection = -1;
+        this.isTurning = true;
+      }
     }
 
     if (this.y < this.size * 0.5) {
       this.y = this.size * 0.5;
+      // Y方向の目標も調整
+      this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.8);
     } else if (this.y > this.p.height - this.size * 0.5) {
       this.y = this.p.height - this.size * 0.5;
+      // Y方向の目標も調整
+      this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.8);
     }
   }
 
   draw(time: number) {
-    // 尾びれの動き（サインカーブで揺れるように）
-    const tailAngle = this.p.sin(time * 5 + this.phaseOffset) * 0.2;
+    // 基本の尾びれの動き（サインカーブで揺れるように）
+    let tailAngle = this.p.sin(time * 5 + this.phaseOffset) * 0.2;
+
+    // 方向転換中は尾びれの動きを強調
+    if (this.isTurning) {
+      // 方向転換の進行度合い（0～1）
+      const turningProgress = Math.abs(this.direction - this.targetDirection);
+
+      // 方向転換中は尾びれをより大きく振る（ターンの方向と逆に）
+      const turnEffect = (this.targetDirection - this.direction) * 0.3;
+
+      // 通常の尾びれの動きに方向転換の効果を加える
+      tailAngle += turnEffect * Math.sin(time * 10) * turningProgress;
+    }
 
     // 金魚を描画
     drawGoldfish(this.p, this.x, this.y, this.size, tailAngle, this.direction);
