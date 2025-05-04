@@ -42,32 +42,32 @@ const sketch = (p: p5) => {
     p.fill(255, 60, 60, 230)
     p.beginShape()
     p.vertex(-size * 0.5, 0)
-    p.bezierVertex(
-      -size * 1.2, -size * 0.7,
-      -size * 1.6, -size * 0.3,
-      -size * 0.8, 0
-    )
-    p.bezierVertex(
-      -size * 1.6, size * 0.3,
-      -size * 1.2, size * 0.7,
-      -size * 0.5, 0
-    )
+    p.vertex(-size * 0.8, -size * 0.3)
+    p.vertex(-size * 1.2, -size * 0.5)
+    p.vertex(-size * 1.6, -size * 0.3)
+    p.vertex(-size * 1.4, -size * 0.15)
+    p.vertex(-size * 0.8, 0)
+    p.vertex(-size * 1.4, size * 0.15)
+    p.vertex(-size * 1.6, size * 0.3)
+    p.vertex(-size * 1.2, size * 0.5)
+    p.vertex(-size * 0.8, size * 0.3)
+    p.vertex(-size * 0.5, 0)
     p.endShape(p.CLOSE)
 
     // 尾びれの模様
     p.fill(255, 100, 100, 150)
     p.beginShape()
     p.vertex(-size * 0.6, 0)
-    p.bezierVertex(
-      -size * 1.0, -size * 0.5,
-      -size * 1.3, -size * 0.2,
-      -size * 0.8, 0
-    )
-    p.bezierVertex(
-      -size * 1.3, size * 0.2,
-      -size * 1.0, size * 0.5,
-      -size * 0.6, 0
-    )
+    p.vertex(-size * 0.8, -size * 0.2)
+    p.vertex(-size * 1.0, -size * 0.35)
+    p.vertex(-size * 1.3, -size * 0.2)
+    p.vertex(-size * 1.1, -size * 0.1)
+    p.vertex(-size * 0.8, 0)
+    p.vertex(-size * 1.1, size * 0.1)
+    p.vertex(-size * 1.3, size * 0.2)
+    p.vertex(-size * 1.0, size * 0.35)
+    p.vertex(-size * 0.8, size * 0.2)
+    p.vertex(-size * 0.6, 0)
     p.endShape(p.CLOSE)
     p.pop()
 
@@ -104,16 +104,17 @@ const sketch = (p: p5) => {
     p.rotate(p.sin(p.frameCount * 0.2) * 0.3)
     p.beginShape()
     p.vertex(0, 0)
-    p.bezierVertex(
-      size * 0.1, size * 0.2,
-      size * 0.2, size * 0.3,
-      size * 0.1, size * 0.4
-    )
-    p.bezierVertex(
-      -size * 0.1, size * 0.3,
-      -size * 0.1, size * 0.1,
-      0, 0
-    )
+    p.vertex(size * 0.05, size * 0.1)
+    p.vertex(size * 0.1, size * 0.2)
+    p.vertex(size * 0.15, size * 0.3)
+    p.vertex(size * 0.1, size * 0.35)
+    p.vertex(size * 0.05, size * 0.4)
+    p.vertex(0, size * 0.38)
+    p.vertex(-size * 0.05, size * 0.35)
+    p.vertex(-size * 0.08, size * 0.3)
+    p.vertex(-size * 0.08, size * 0.2)
+    p.vertex(-size * 0.05, size * 0.1)
+    p.vertex(0, 0)
     p.endShape(p.CLOSE)
     p.pop()
 
@@ -121,11 +122,13 @@ const sketch = (p: p5) => {
     p.fill(255, 100, 100, 200)
     p.beginShape()
     p.vertex(-size * 0.1, -size * 0.3)
-    p.bezierVertex(
-      -size * 0.2, -size * 0.6,
-      0, -size * 0.7,
-      size * 0.1, -size * 0.3
-    )
+    p.vertex(-size * 0.15, -size * 0.4)
+    p.vertex(-size * 0.1, -size * 0.5)
+    p.vertex(-size * 0.05, -size * 0.6)
+    p.vertex(0, -size * 0.7)
+    p.vertex(size * 0.05, -size * 0.6)
+    p.vertex(size * 0.1, -size * 0.5)
+    p.vertex(size * 0.1, -size * 0.3)
     p.endShape(p.CLOSE)
 
     // 腹びれ
@@ -135,16 +138,17 @@ const sketch = (p: p5) => {
     p.rotate(p.sin(p.frameCount * 0.15 + 1) * 0.2)
     p.beginShape()
     p.vertex(0, 0)
-    p.bezierVertex(
-      -size * 0.1, size * 0.2,
-      -size * 0.2, size * 0.3,
-      -size * 0.1, size * 0.4
-    )
-    p.bezierVertex(
-      size * 0.1, size * 0.3,
-      size * 0.1, size * 0.1,
-      0, 0
-    )
+    p.vertex(-size * 0.05, size * 0.1)
+    p.vertex(-size * 0.1, size * 0.2)
+    p.vertex(-size * 0.15, size * 0.3)
+    p.vertex(-size * 0.1, size * 0.35)
+    p.vertex(-size * 0.05, size * 0.4)
+    p.vertex(0, size * 0.38)
+    p.vertex(size * 0.05, size * 0.35)
+    p.vertex(size * 0.08, size * 0.3)
+    p.vertex(size * 0.08, size * 0.2)
+    p.vertex(size * 0.05, size * 0.1)
+    p.vertex(0, 0)
     p.endShape(p.CLOSE)
     p.pop()
 
