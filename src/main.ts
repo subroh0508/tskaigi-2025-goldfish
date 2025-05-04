@@ -1,9 +1,7 @@
-// main.tsの既存コードをベースに修正
-
 import p5 from 'p5';
 
-// SVGパスをポリゴンとして描画する関数
-const drawSVGPathAsDetailedPolygon = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+// 胴体部分を描画する関数
+const drawBody = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
   p.push();
   p.translate(x, y);
 
@@ -14,107 +12,270 @@ const drawSVGPathAsDetailedPolygon = (p: p5, x: number, y: number, size: number,
 
   p.scale((direction * size) / 1000, size / 1000);
 
-  const baseColor = p.color(255, 45, 45);
-  p.fill(baseColor);
+  // 胴体の色
+  p.fill(255, 45, 45);
   p.noStroke();
 
-  // SVGパスの点を多数のポイントに変換して滑らかなポリゴンを作成
-  const points = [
-    // 開始点
-    [890.004, 157.419],
-
-    // 細かく点を追加してカーブを近似
-    [870.0, 165.0], [850.0, 172.0], [830.0, 179.0], [810.0, 182.0],
-    [790.0, 176.0], [780.0, 170.0], [775.0, 165.0], [770.452, 161.233],
-
-    [772.0, 160.0], [775.0, 158.0], [780.0, 156.0], [785.0, 154.0],
-    [790.0, 153.0], [797.552, 152.503],
-
-    [795.0, 150.0], [792.0, 148.0], [788.409, 146.179],
-
-    [789.0, 144.0], [790.0, 142.0], [793.0, 140.0], [792.0, 136.0],
-    [790.0, 133.0], [787.894, 130.726],
-
-    [787.0, 129.0], [784.0, 126.0], [780.0, 123.0], [783.0, 120.0],
-    [786.0, 118.0], [790.151, 117.351],
-
-    [800.0, 115.0], [810.0, 114.0], [820.0, 116.0], [830.0, 119.0],
-    [840.0, 122.0], [853.445, 125.119],
-
-    [850.0, 123.0], [845.0, 120.0], [840.0, 117.0], [830.0, 110.0],
-    [820.0, 102.0], [812.122, 95.282],
-
-    [800.0, 90.0], [780.0, 80.0], [760.0, 75.0], [740.0, 80.0],
-    [720.0, 90.0], [705.022, 102.241],
-
-    [710.0, 95.0], [720.0, 88.0], [730.0, 82.0], [740.0, 77.0],
-    [760.0, 73.0], [780.962, 72.119],
-
-    [770.0, 70.0], [760.0, 68.0], [740.0, 67.0], [720.0, 68.0],
-    [710.0, 69.0], [702.517, 69.802],
-
-    [702.5, 69.7], [705.0, 65.0], [710.0, 58.0], [720.0, 50.0],
-    [735.0, 43.0], [750.0, 38.0], [762.159, 37.332],
-
-    [765.0, 37.0], [780.0, 36.0], [800.0, 37.0], [820.0, 45.0],
-    [835.0, 53.0], [850.541, 61.166],
-
-    [860.0, 68.0], [870.0, 75.0], [880.0, 85.0], [885.0, 95.0],
-    [895.0, 105.0], [910.206, 117.274],
-
-    [915.0, 115.0], [925.0, 112.0], [935.0, 110.0], [945.0, 112.0],
-    [951.801, 113.922],
-
-    [950.0, 105.0], [949.0, 95.0], [948.199, 89.774],
-
-    [950.0, 88.0], [955.0, 85.0], [960.0, 84.0], [965.0, 86.0],
-    [970.0, 89.0], [976.326, 92.47],
-
-    [975.0, 100.0], [972.0, 110.0], [968.0, 118.0], [965.647, 122.736],
-
-    [970.0, 126.0], [975.0, 130.0], [980.0, 135.0], [985.0, 140.0],
-    [990.0, 145.0], [995.0, 150.0], [1000.04, 154.882],
-
-    [1000.5, 154.0], [1002.0, 155.0], [1005.0, 157.0], [1008.0, 160.0],
-    [1010.82, 162.204],
-
-    [1012.0, 164.0], [1013.5, 167.0], [1015.0, 170.0], [1014.5, 173.0],
-    [1013.83, 174.832],
-
-    [1014.5, 177.0], [1016.0, 180.0], [1016.5, 185.0], [1015.0, 190.0],
-    [1013.5, 194.0], [1012.83, 197.45],
-
-    [1012.0, 200.0], [1010.0, 203.0], [1006.0, 206.0], [1002.0, 209.0],
-    [998.0, 210.0], [994.98, 210.824],
-
-    [994.0, 211.5], [992.0, 212.5], [990.0, 213.5], [987.0, 214.0],
-    [985.0, 214.2], [983.103, 214.302],
-
-    [981.0, 214.2], [979.0, 214.0], [976.0, 213.0], [973.0, 211.0],
-    [972.0, 210.0], [971.358, 209.838],
-
-    [971.3, 209.8], [971.2, 209.78], [971.0, 209.76], [970.825, 209.718],
-
-    [969.0, 209.5], [965.0, 209.0], [960.0, 208.0], [950.0, 206.0],
-    [940.0, 204.0], [930.0, 200.0], [922.452, 197.381],
-
-    [920.0, 200.0], [915.0, 205.0], [910.0, 210.0], [906.0, 216.0],
-    [902.603, 222.784],
-
-    [900.0, 222.0], [896.0, 220.0], [892.0, 217.0], [888.0, 212.0],
-    [886.0, 205.0], [885.192, 200.531],
-
-    [890.0, 198.0], [895.0, 195.0], [900.0, 193.0], [905.0, 191.0],
-    [908.145, 190.272],
-
-    [905.0, 188.0], [902.0, 185.0], [898.0, 180.0], [895.0, 175.0],
-    [892.0, 168.0], [890.0, 160.0], [890.004, 157.419]
-  ];
-
+  // 胴体のポイント
   p.beginShape();
-  for (const point of points) {
-    p.vertex(point[0], point[1]);
-  }
+  p.vertex(890.004, 157.419);
+  p.vertex(870.0, 165.0);
+  p.vertex(850.0, 172.0);
+  p.vertex(830.0, 179.0);
+  p.vertex(810.0, 182.0);
+  p.vertex(790.0, 176.0);
+  p.vertex(780.0, 170.0);
+  p.vertex(775.0, 165.0);
+  p.vertex(770.452, 161.233);
+  p.vertex(772.0, 160.0);
+  p.vertex(775.0, 158.0);
+  p.vertex(780.0, 156.0);
+  p.vertex(785.0, 154.0);
+  p.vertex(790.0, 153.0);
+  p.vertex(797.552, 152.503);
+  p.vertex(795.0, 150.0);
+  p.vertex(792.0, 148.0);
+  p.vertex(788.409, 146.179);
+  p.vertex(789.0, 144.0);
+  p.vertex(790.0, 142.0);
+  p.vertex(793.0, 140.0);
+  p.vertex(792.0, 136.0);
+  p.vertex(790.0, 133.0);
+  p.vertex(787.894, 130.726);
+  p.vertex(787.0, 129.0);
+  p.vertex(784.0, 126.0);
+  p.vertex(780.0, 123.0);
+  p.vertex(783.0, 120.0);
+  p.vertex(786.0, 118.0);
+  p.vertex(790.151, 117.351);
+  p.vertex(800.0, 115.0);
+  p.vertex(810.0, 114.0);
+  p.vertex(820.0, 116.0);
+  p.vertex(830.0, 119.0);
+  p.vertex(840.0, 122.0);
+  p.vertex(853.445, 125.119);
+  p.vertex(850.0, 123.0);
+  p.vertex(845.0, 120.0);
+  p.vertex(840.0, 117.0);
+  p.vertex(830.0, 110.0);
+  p.vertex(820.0, 102.0);
+  p.vertex(812.122, 95.282);
+  p.vertex(800.0, 90.0);
+  p.vertex(780.0, 80.0);
+  p.vertex(760.0, 75.0);
+  p.vertex(740.0, 80.0);
+  p.vertex(720.0, 90.0);
+  p.vertex(705.022, 102.241);
+  p.vertex(710.0, 95.0);
+  p.vertex(720.0, 88.0);
+  p.vertex(730.0, 82.0);
+  p.vertex(740.0, 77.0);
+  p.vertex(760.0, 73.0);
+  p.vertex(780.962, 72.119);
+  p.vertex(770.0, 70.0);
+  p.vertex(760.0, 68.0);
+  p.vertex(740.0, 67.0);
+  p.vertex(720.0, 68.0);
+  p.vertex(710.0, 69.0);
+  p.vertex(702.517, 69.802);
+  p.vertex(702.5, 69.7);
+  p.vertex(705.0, 65.0);
+  p.vertex(710.0, 58.0);
+  p.vertex(720.0, 50.0);
+  p.vertex(735.0, 43.0);
+  p.vertex(750.0, 38.0);
+  p.vertex(762.159, 37.332);
+  p.vertex(765.0, 37.0);
+  p.vertex(780.0, 36.0);
+  p.vertex(800.0, 37.0);
+  p.vertex(820.0, 45.0);
+  p.vertex(835.0, 53.0);
+  p.vertex(850.541, 61.166);
+  p.vertex(860.0, 68.0);
+  p.vertex(870.0, 75.0);
+  p.vertex(880.0, 85.0);
+  p.vertex(885.0, 95.0);
+  p.vertex(895.0, 105.0);
+  p.vertex(910.206, 117.274);
+  p.vertex(915.0, 115.0);
+  p.vertex(922.0, 180.0);
+  p.vertex(915.0, 185.0);
+  p.vertex(905.0, 188.0);
+  p.vertex(902.0, 185.0);
+  p.vertex(898.0, 180.0);
+  p.vertex(895.0, 175.0);
+  p.vertex(892.0, 168.0);
+  p.vertex(890.0, 160.0);
+  p.vertex(890.004, 157.419);
+  p.endShape(p.CLOSE);
+
+  p.pop();
+};
+
+// 右胸びれを描画する関数
+const drawRightFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+  p.push();
+  p.translate(x, y);
+
+  // びれの動きを尾の動きと合わせる
+  const finOffsetX = p.sin(tailAngle * 0.5) * 3;
+  const finOffsetY = p.cos(tailAngle * 0.3) * 2;
+  p.translate(finOffsetX, finOffsetY);
+
+  p.scale((direction * size) / 1000, size / 1000);
+
+  // びれの色 (少し透明度を持たせる)
+  p.fill(255, 100, 100, 200);
+  p.noStroke();
+
+  // 右胸びれのポイント
+  p.beginShape();
+  p.vertex(915.0, 115.0);
+  p.vertex(925.0, 112.0);
+  p.vertex(935.0, 110.0);
+  p.vertex(945.0, 112.0);
+  p.vertex(951.801, 113.922);
+  p.vertex(950.0, 105.0);
+  p.vertex(949.0, 95.0);
+  p.vertex(948.199, 89.774);
+  p.vertex(950.0, 88.0);
+  p.vertex(955.0, 85.0);
+  p.vertex(960.0, 84.0);
+  p.vertex(965.0, 86.0);
+  p.vertex(970.0, 89.0);
+  p.vertex(976.326, 92.47);
+  p.vertex(975.0, 100.0);
+  p.vertex(972.0, 110.0);
+  p.vertex(968.0, 118.0);
+  p.vertex(965.647, 122.736);
+  p.vertex(915.0, 115.0);
+  p.endShape(p.CLOSE);
+
+  p.pop();
+};
+
+// 左胸びれを描画する関数
+const drawLeftFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+  p.push();
+  p.translate(x, y);
+
+  // びれの動きを尾の動きと合わせる
+  const finOffsetX = p.sin(tailAngle * 0.5) * 3;
+  const finOffsetY = p.cos(tailAngle * 0.3) * 2;
+  p.translate(finOffsetX, finOffsetY);
+
+  p.scale((direction * size) / 1000, size / 1000);
+
+  // びれの色 (少し透明度を持たせる)
+  p.fill(255, 100, 100, 200);
+  p.noStroke();
+
+  // 左胸びれのポイント
+  p.beginShape();
+  p.vertex(885.192, 200.531);
+  p.vertex(890.0, 198.0);
+  p.vertex(895.0, 195.0);
+  p.vertex(900.0, 193.0);
+  p.vertex(905.0, 191.0);
+  p.vertex(908.145, 190.272);
+  p.vertex(905.0, 188.0);
+  p.vertex(902.0, 185.0);
+  p.vertex(898.0, 180.0);
+  p.vertex(895.0, 175.0);
+  p.vertex(892.0, 168.0);
+  p.vertex(890.0, 160.0);
+  p.vertex(890.0, 198.0);
+  p.vertex(885.192, 200.531);
+  p.endShape(p.CLOSE);
+
+  p.pop();
+};
+
+// 尾びれを描画する関数
+const drawTailFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+  p.push();
+  p.translate(x, y);
+
+  // 尾びれの動きを表現
+  const tailOffsetX = p.sin(tailAngle) * 10;
+  p.translate(tailOffsetX, 0);
+
+  p.scale((direction * size) / 1000, size / 1000);
+
+  // 尾びれの色 (少し透明度を持たせる)
+  p.fill(255, 80, 80, 180);
+  p.noStroke();
+
+  // 尾びれのポイント
+  p.beginShape();
+  p.vertex(965.647, 122.736);
+  p.vertex(970.0, 126.0);
+  p.vertex(975.0, 130.0);
+  p.vertex(980.0, 135.0);
+  p.vertex(985.0, 140.0);
+  p.vertex(990.0, 145.0);
+  p.vertex(995.0, 150.0);
+  p.vertex(1000.04, 154.882);
+  p.vertex(1000.5, 154.0);
+  p.vertex(1002.0, 155.0);
+  p.vertex(1005.0, 157.0);
+  p.vertex(1008.0, 160.0);
+  p.vertex(1010.82, 162.204);
+  p.vertex(1012.0, 164.0);
+  p.vertex(1013.5, 167.0);
+  p.vertex(1015.0, 170.0);
+  p.vertex(1014.5, 173.0);
+  p.vertex(1013.83, 174.832);
+  p.vertex(1014.5, 177.0);
+  p.vertex(1016.0, 180.0);
+  p.vertex(1016.5, 185.0);
+  p.vertex(1015.0, 190.0);
+  p.vertex(1013.5, 194.0);
+  p.vertex(1012.83, 197.45);
+  p.vertex(1012.0, 200.0);
+  p.vertex(1010.0, 203.0);
+  p.vertex(1006.0, 206.0);
+  p.vertex(1002.0, 209.0);
+  p.vertex(998.0, 210.0);
+  p.vertex(994.98, 210.824);
+  p.vertex(994.0, 211.5);
+  p.vertex(992.0, 212.5);
+  p.vertex(990.0, 213.5);
+  p.vertex(987.0, 214.0);
+  p.vertex(985.0, 214.2);
+  p.vertex(983.103, 214.302);
+  p.vertex(981.0, 214.2);
+  p.vertex(979.0, 214.0);
+  p.vertex(976.0, 213.0);
+  p.vertex(973.0, 211.0);
+  p.vertex(972.0, 210.0);
+  p.vertex(971.358, 209.838);
+  p.vertex(971.3, 209.8);
+  p.vertex(971.2, 209.78);
+  p.vertex(971.0, 209.76);
+  p.vertex(970.825, 209.718);
+  p.vertex(969.0, 209.5);
+  p.vertex(965.0, 209.0);
+  p.vertex(960.0, 208.0);
+  p.vertex(950.0, 206.0);
+  p.vertex(940.0, 204.0);
+  p.vertex(930.0, 200.0);
+  p.vertex(922.452, 197.381);
+  p.vertex(920.0, 200.0);
+  p.vertex(915.0, 205.0);
+  p.vertex(910.0, 210.0);
+  p.vertex(906.0, 216.0);
+  p.vertex(902.603, 222.784);
+  p.vertex(900.0, 222.0);
+  p.vertex(896.0, 220.0);
+  p.vertex(892.0, 217.0);
+  p.vertex(888.0, 212.0);
+  p.vertex(886.0, 205.0);
+  p.vertex(885.192, 200.531);
+  p.vertex(908.145, 190.272);
+  p.vertex(922.0, 180.0);
+  p.vertex(915.0, 115.0);
+  p.vertex(965.647, 122.736);
   p.endShape(p.CLOSE);
 
   p.pop();
@@ -122,8 +283,13 @@ const drawSVGPathAsDetailedPolygon = (p: p5, x: number, y: number, size: number,
 
 // 金魚を描画するメイン関数
 const drawGoldfish = (p: p5, x: number, y: number, size: number, tailAngle: number, direction: number) => {
-  // 本体
-  drawSVGPathAsDetailedPolygon(p, x, y, size, direction, tailAngle);
+  // 尾びれを先に描画（重なり順を考慮）
+  drawTailFin(p, x, y, size, direction, tailAngle);
+  // 胴体を描画
+  drawBody(p, x, y, size, direction, tailAngle);
+  // 胸びれを描画
+  drawRightFin(p, x, y, size, direction, tailAngle);
+  drawLeftFin(p, x, y, size, direction, tailAngle);
 };
 
 // 金魚のクラス
@@ -135,11 +301,11 @@ class Goldfish {
   targetY: number;
   size: number;
   direction: number;
-  targetDirection: number;  // 目標とする向き
-  turningSpeed: number;     // 向きの変化速度
+  targetDirection: number;
+  turningSpeed: number;
   speed: number;
   phaseOffset: number;
-  isTurning: boolean;       // 方向転換中かどうか
+  isTurning: boolean;
 
   constructor(p: p5, x: number, y: number, size: number, direction: number, phaseOffset: number = 0) {
     this.p = p;
@@ -150,7 +316,7 @@ class Goldfish {
     this.size = size;
     this.direction = direction;
     this.targetDirection = direction;
-    this.turningSpeed = 0.1;  // 向きの変化速度（調整可能）
+    this.turningSpeed = 0.1;
     this.speed = p.random(0.01, 0.03);
     this.phaseOffset = phaseOffset;
     this.isTurning = false;
