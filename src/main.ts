@@ -120,70 +120,10 @@ const drawSVGPathAsDetailedPolygon = (p: p5, x: number, y: number, size: number,
   p.pop();
 };
 
-// 尾びれ用の別の描画関数
-const drawTail = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
-  p.push();
-
-  // 尾びれの位置（金魚の体の後ろ側）
-  const tailX = x + (direction > 0 ? -size * 0.25 : size * 0.25);
-  const tailY = y;
-
-  // 体の動きに合わせて少し揺らす
-  const bodyOffsetX = p.sin(tailAngle * 0.5) * 3;
-  const bodyOffsetY = p.cos(tailAngle * 0.3) * 2;
-
-  p.translate(tailX + bodyOffsetX, tailY + bodyOffsetY);
-  p.rotate(tailAngle * direction);
-
-  // 尾びれの形状
-  p.fill(255, 45, 45);
-  p.noStroke();
-  p.beginShape();
-  for (let i = 0; i < 20; i++) {
-    const angle = p.map(i, 0, 19, -p.PI * 0.4, p.PI * 0.4);
-    const r = size * 0.25 + p.sin(angle * 2) * (size * 0.1);
-    p.vertex(direction * r * p.cos(angle), r * p.sin(angle));
-  }
-  p.vertex(0, 0);
-  p.endShape(p.CLOSE);
-
-  p.pop();
-};
-
 // 金魚を描画するメイン関数
 const drawGoldfish = (p: p5, x: number, y: number, size: number, tailAngle: number, direction: number) => {
   // 本体
   drawSVGPathAsDetailedPolygon(p, x, y, size, direction, tailAngle);
-
-  // 尾びれ（別に描画して動きをつける）
-  drawTail(p, x, y, size, direction, tailAngle);
-
-  // 目や他のディテールを追加
-  p.push();
-
-  // 体の動きに合わせて少し揺らす
-  const bodyOffsetX = p.sin(tailAngle * 0.5) * 3;
-  const bodyOffsetY = p.cos(tailAngle * 0.3) * 2;
-
-  p.translate(x + bodyOffsetX, y + bodyOffsetY);
-  p.scale(size / 1000 * direction, size / 1000);
-
-  // 目を追加
-  p.fill(0);
-  p.ellipse(950, 110, 15, 15);
-  p.fill(255);
-  p.ellipse(953, 107, 5, 5);
-
-  p.fill(0);
-  p.ellipse(950, 135, 15, 15);
-  p.fill(255);
-  p.ellipse(953, 132, 5, 5);
-
-  // ハイライト（光の反射）
-  p.fill(255, 255, 255, 70);
-  p.ellipse(850, 120, 150, 80);
-
-  p.pop();
 };
 
 // 金魚のクラス
