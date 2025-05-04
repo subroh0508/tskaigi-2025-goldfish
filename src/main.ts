@@ -33,48 +33,48 @@ const sketch = (p: p5) => {
     const baseColor = p.color(255, 30, 30) // 基本の赤色
     const highlightColor = p.color(255, 80, 80) // ハイライト色
 
-    // 尾びれ
+    // 体
+    p.fill(baseColor)
+    p.noStroke()
+    p.ellipse(0, 0, size, size * 0.6)
+
+    // 尾びれ - 体の後ろにぴったりくっつくように位置調整
     p.push()
-    p.translate(-size * 0.5, 0)
+    p.translate(-size * 0.25, 0) // ここを-0.5から-0.25に変更して体に近づける
     p.rotate(tailAngle)
 
     // 尾びれのグラデーション
     p.fill(255, 60, 60, 230)
     p.beginShape()
-    p.vertex(-size * 0.5, 0)
-    p.vertex(-size * 0.8, -size * 0.3)
-    p.vertex(-size * 1.2, -size * 0.5)
-    p.vertex(-size * 1.6, -size * 0.3)
-    p.vertex(-size * 1.4, -size * 0.15)
-    p.vertex(-size * 0.8, 0)
-    p.vertex(-size * 1.4, size * 0.15)
-    p.vertex(-size * 1.6, size * 0.3)
-    p.vertex(-size * 1.2, size * 0.5)
-    p.vertex(-size * 0.8, size * 0.3)
-    p.vertex(-size * 0.5, 0)
+    p.vertex(-size * 0.25, 0) // 始点も調整
+    p.vertex(-size * 0.55, -size * 0.3)
+    p.vertex(-size * 0.95, -size * 0.5)
+    p.vertex(-size * 1.35, -size * 0.3)
+    p.vertex(-size * 1.15, -size * 0.15)
+    p.vertex(-size * 0.55, 0)
+    p.vertex(-size * 1.15, size * 0.15)
+    p.vertex(-size * 1.35, size * 0.3)
+    p.vertex(-size * 0.95, size * 0.5)
+    p.vertex(-size * 0.55, size * 0.3)
+    p.vertex(-size * 0.25, 0) // 終点も調整
     p.endShape(p.CLOSE)
 
-    // 尾びれの模様
+    // 尾びれの模様 - こちらも位置調整
     p.fill(255, 100, 100, 150)
     p.beginShape()
-    p.vertex(-size * 0.6, 0)
-    p.vertex(-size * 0.8, -size * 0.2)
-    p.vertex(-size * 1.0, -size * 0.35)
-    p.vertex(-size * 1.3, -size * 0.2)
-    p.vertex(-size * 1.1, -size * 0.1)
-    p.vertex(-size * 0.8, 0)
-    p.vertex(-size * 1.1, size * 0.1)
-    p.vertex(-size * 1.3, size * 0.2)
-    p.vertex(-size * 1.0, size * 0.35)
-    p.vertex(-size * 0.8, size * 0.2)
-    p.vertex(-size * 0.6, 0)
+    p.vertex(-size * 0.35, 0) // 始点を調整
+    p.vertex(-size * 0.55, -size * 0.2)
+    p.vertex(-size * 0.75, -size * 0.35)
+    p.vertex(-size * 1.05, -size * 0.2)
+    p.vertex(-size * 0.85, -size * 0.1)
+    p.vertex(-size * 0.55, 0)
+    p.vertex(-size * 0.85, size * 0.1)
+    p.vertex(-size * 1.05, size * 0.2)
+    p.vertex(-size * 0.75, size * 0.35)
+    p.vertex(-size * 0.55, size * 0.2)
+    p.vertex(-size * 0.35, 0) // 終点も調整
     p.endShape(p.CLOSE)
     p.pop()
-
-    // 体
-    p.fill(baseColor)
-    p.noStroke()
-    p.ellipse(0, 0, size, size * 0.6)
 
     // 体のハイライト
     p.fill(highlightColor)
