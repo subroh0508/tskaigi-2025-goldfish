@@ -23,137 +23,166 @@ const sketch = (p: p5) => {
     y = p.height / 2
   }
 
-  // 金魚を描画する関数
+  // TSKaigi 2025の金魚SVGを忠実に再現する関数
   const drawGoldfish = (x: number, y: number, size: number, tailAngle: number, direction: number) => {
     p.push()
     p.translate(x, y)
     p.scale(direction, 1) // 向きに応じて反転
 
-    // グラデーション効果のための準備
-    const baseColor = p.color(255, 30, 30) // 基本の赤色
-    const highlightColor = p.color(255, 80, 80) // ハイライト色
+    // ベースとなる色を定義
+    const baseColor = p.color(255, 45, 45); // 鮮やかな赤
+    const darkRedColor = p.color(220, 30, 30); // 少し暗めの赤
+    const lightRedColor = p.color(255, 85, 85); // 明るめの赤
+    
+    p.noStroke(); // 線なし
 
-    // 体
-    p.fill(baseColor)
-    p.noStroke()
-    p.ellipse(0, 0, size, size * 0.6)
-
-    // 尾びれ - 体の後ろにぴったりくっつくように位置調整
+    // 尾びれを描画
     p.push()
-    p.translate(-size * 0.25, 0) // ここを-0.5から-0.25に変更して体に近づける
-    p.rotate(tailAngle)
+    p.translate(-size * 0.4, 0)
+    p.rotate(tailAngle * 0.3) // 尾の動きを控えめに
 
-    // 尾びれのグラデーション
-    p.fill(255, 60, 60, 230)
-    p.beginShape()
-    p.vertex(-size * 0.25, 0) // 始点も調整
-    p.vertex(-size * 0.55, -size * 0.3)
-    p.vertex(-size * 0.95, -size * 0.5)
-    p.vertex(-size * 1.35, -size * 0.3)
-    p.vertex(-size * 1.15, -size * 0.15)
-    p.vertex(-size * 0.55, 0)
-    p.vertex(-size * 1.15, size * 0.15)
-    p.vertex(-size * 1.35, size * 0.3)
-    p.vertex(-size * 0.95, size * 0.5)
-    p.vertex(-size * 0.55, size * 0.3)
-    p.vertex(-size * 0.25, 0) // 終点も調整
-    p.endShape(p.CLOSE)
+    // 尾びれ本体
+    p.fill(baseColor);
+    p.beginShape();
+    p.vertex(0, 0);
+    p.vertex(-size * 0.2, -size * 0.25);
+    p.vertex(-size * 0.4, -size * 0.35);
+    p.vertex(-size * 0.5, -size * 0.25);
+    p.vertex(-size * 0.45, -size * 0.15);
+    p.vertex(-size * 0.3, -size * 0.1);
+    p.vertex(-size * 0.3, size * 0.1);
+    p.vertex(-size * 0.45, size * 0.15);
+    p.vertex(-size * 0.5, size * 0.25);
+    p.vertex(-size * 0.4, size * 0.35);
+    p.vertex(-size * 0.2, size * 0.25);
+    p.vertex(0, 0);
+    p.endShape();
+    
+    // 尾びれの内部の模様（より明るい赤）
+    p.fill(lightRedColor);
+    p.beginShape();
+    p.vertex(-size * 0.05, 0);
+    p.vertex(-size * 0.15, -size * 0.15);
+    p.vertex(-size * 0.25, -size * 0.25);
+    p.vertex(-size * 0.3, -size * 0.2);
+    p.vertex(-size * 0.25, -size * 0.1);
+    p.vertex(-size * 0.15, -size * 0.05);
+    p.vertex(-size * 0.15, size * 0.05);
+    p.vertex(-size * 0.25, size * 0.1);
+    p.vertex(-size * 0.3, size * 0.2);
+    p.vertex(-size * 0.25, size * 0.25);
+    p.vertex(-size * 0.15, size * 0.15);
+    p.vertex(-size * 0.05, 0);
+    p.endShape();
+    p.pop();
 
-    // 尾びれの模様 - こちらも位置調整
-    p.fill(255, 100, 100, 150)
-    p.beginShape()
-    p.vertex(-size * 0.35, 0) // 始点を調整
-    p.vertex(-size * 0.55, -size * 0.2)
-    p.vertex(-size * 0.75, -size * 0.35)
-    p.vertex(-size * 1.05, -size * 0.2)
-    p.vertex(-size * 0.85, -size * 0.1)
-    p.vertex(-size * 0.55, 0)
-    p.vertex(-size * 0.85, size * 0.1)
-    p.vertex(-size * 1.05, size * 0.2)
-    p.vertex(-size * 0.75, size * 0.35)
-    p.vertex(-size * 0.55, size * 0.2)
-    p.vertex(-size * 0.35, 0) // 終点も調整
-    p.endShape(p.CLOSE)
-    p.pop()
+    // 体の部分
+    p.fill(baseColor);
+    p.ellipse(0, 0, size * 0.8, size * 0.5);
+    
+    // 頭部分
+    p.fill(baseColor);
+    p.ellipse(size * 0.35, 0, size * 0.3, size * 0.25);
+    
+    // 体と頭の境目を滑らかにする接続部分
+    p.fill(baseColor);
+    p.beginShape();
+    p.vertex(size * 0.2, -size * 0.2);
+    p.vertex(size * 0.25, -size * 0.15);
+    p.vertex(size * 0.3, -size * 0.12);
+    p.vertex(size * 0.35, -size * 0.125);
+    p.vertex(size * 0.35, size * 0.125);
+    p.vertex(size * 0.3, size * 0.12);
+    p.vertex(size * 0.25, size * 0.15);
+    p.vertex(size * 0.2, size * 0.2);
+    p.endShape();
 
-    // 体のハイライト
-    p.fill(highlightColor)
-    p.ellipse(size * 0.1, -size * 0.1, size * 0.8, size * 0.4)
+    // 胸びれ（左右）
+    // 左胸びれ
+    p.fill(lightRedColor);
+    p.push();
+    p.translate(size * 0.1, -size * 0.22);
+    p.rotate(p.sin(p.frameCount * 0.1) * 0.2 - 0.3);
+    p.beginShape();
+    p.vertex(0, 0);
+    p.vertex(-size * 0.1, -size * 0.12);
+    p.vertex(-size * 0.05, -size * 0.18);
+    p.vertex(size * 0.05, -size * 0.15);
+    p.vertex(size * 0.03, -size * 0.05);
+    p.vertex(0, 0);
+    p.endShape();
+    p.pop();
 
-    // 頭
-    p.fill(baseColor)
-    p.ellipse(size * 0.3, 0, size * 0.5, size * 0.4)
-
-    // 目
-    p.fill(0)
-    p.ellipse(size * 0.45, -size * 0.1, size * 0.08, size * 0.08)
-    p.fill(255)
-    p.ellipse(size * 0.47, -size * 0.12, size * 0.03, size * 0.03)
-
-    // 口
-    p.stroke(150, 30, 30)
-    p.strokeWeight(size * 0.02)
-    p.noFill()
-    p.arc(size * 0.5, size * 0.05, size * 0.1, size * 0.1, 0, p.PI * 0.7)
-    p.noStroke()
-
-    // 胸びれ
-    p.fill(255, 100, 100, 200)
-    p.push()
-    p.translate(0, size * 0.2)
-    p.rotate(p.sin(p.frameCount * 0.2) * 0.3)
-    p.beginShape()
-    p.vertex(0, 0)
-    p.vertex(size * 0.05, size * 0.1)
-    p.vertex(size * 0.1, size * 0.2)
-    p.vertex(size * 0.15, size * 0.3)
-    p.vertex(size * 0.1, size * 0.35)
-    p.vertex(size * 0.05, size * 0.4)
-    p.vertex(0, size * 0.38)
-    p.vertex(-size * 0.05, size * 0.35)
-    p.vertex(-size * 0.08, size * 0.3)
-    p.vertex(-size * 0.08, size * 0.2)
-    p.vertex(-size * 0.05, size * 0.1)
-    p.vertex(0, 0)
-    p.endShape(p.CLOSE)
-    p.pop()
+    // 右胸びれ
+    p.fill(lightRedColor);
+    p.push();
+    p.translate(size * 0.1, size * 0.22);
+    p.rotate(p.sin(p.frameCount * 0.1) * 0.2 + 0.3);
+    p.beginShape();
+    p.vertex(0, 0);
+    p.vertex(-size * 0.1, size * 0.12);
+    p.vertex(-size * 0.05, size * 0.18);
+    p.vertex(size * 0.05, size * 0.15);
+    p.vertex(size * 0.03, size * 0.05);
+    p.vertex(0, 0);
+    p.endShape();
+    p.pop();
 
     // 背びれ
-    p.fill(255, 100, 100, 200)
-    p.beginShape()
-    p.vertex(-size * 0.1, -size * 0.3)
-    p.vertex(-size * 0.15, -size * 0.4)
-    p.vertex(-size * 0.1, -size * 0.5)
-    p.vertex(-size * 0.05, -size * 0.6)
-    p.vertex(0, -size * 0.7)
-    p.vertex(size * 0.05, -size * 0.6)
-    p.vertex(size * 0.1, -size * 0.5)
-    p.vertex(size * 0.1, -size * 0.3)
-    p.endShape(p.CLOSE)
+    p.fill(lightRedColor);
+    p.beginShape();
+    p.vertex(-size * 0.1, 0);
+    p.vertex(-size * 0.15, -size * 0.18);
+    p.vertex(-size * 0.05, -size * 0.25);
+    p.vertex(size * 0.05, -size * 0.2);
+    p.vertex(size * 0.12, -size * 0.15);
+    p.vertex(size * 0.1, -size * 0.05);
+    p.vertex(-size * 0.1, 0);
+    p.endShape();
 
-    // 腹びれ
-    p.fill(255, 100, 100, 180)
-    p.push()
-    p.translate(-size * 0.2, size * 0.25)
-    p.rotate(p.sin(p.frameCount * 0.15 + 1) * 0.2)
-    p.beginShape()
-    p.vertex(0, 0)
-    p.vertex(-size * 0.05, size * 0.1)
-    p.vertex(-size * 0.1, size * 0.2)
-    p.vertex(-size * 0.15, size * 0.3)
-    p.vertex(-size * 0.1, size * 0.35)
-    p.vertex(-size * 0.05, size * 0.4)
-    p.vertex(0, size * 0.38)
-    p.vertex(size * 0.05, size * 0.35)
-    p.vertex(size * 0.08, size * 0.3)
-    p.vertex(size * 0.08, size * 0.2)
-    p.vertex(size * 0.05, size * 0.1)
-    p.vertex(0, 0)
-    p.endShape(p.CLOSE)
-    p.pop()
+    // 体の模様（濃い赤色）
+    p.fill(darkRedColor);
+    p.beginShape();
+    p.vertex(-size * 0.25, -size * 0.05);
+    p.vertex(-size * 0.1, -size * 0.15);
+    p.vertex(size * 0.05, -size * 0.1);
+    p.vertex(size * 0.2, -size * 0.05);
+    p.vertex(size * 0.25, 0);
+    p.vertex(size * 0.2, size * 0.05);
+    p.vertex(size * 0.05, size * 0.1);
+    p.vertex(-size * 0.1, size * 0.15);
+    p.vertex(-size * 0.25, size * 0.05);
+    p.vertex(-size * 0.3, 0);
+    p.vertex(-size * 0.25, -size * 0.05);
+    p.endShape();
 
-    p.pop()
-  }
+    // 目（両側）
+    // 左目
+    p.fill(0);
+    p.ellipse(size * 0.4, -size * 0.08, size * 0.06, size * 0.06);
+    p.fill(255);
+    p.ellipse(size * 0.41, -size * 0.09, size * 0.02, size * 0.02);
+
+    // 右目
+    p.fill(0);
+    p.ellipse(size * 0.4, size * 0.08, size * 0.06, size * 0.06);
+    p.fill(255);
+    p.ellipse(size * 0.41, size * 0.09, size * 0.02, size * 0.02);
+
+    // 体のハイライト
+    p.fill(255, 255, 255, 70);
+    p.ellipse(size * 0.05, 0, size * 0.5, size * 0.3);
+    p.fill(255, 255, 255, 40);
+    p.ellipse(size * 0.1, 0, size * 0.6, size * 0.35);
+
+    // 金魚の特徴的な白い点（らんちゅう風）
+    p.fill(255, 255, 255, 130);
+    p.ellipse(-size * 0.15, size * 0.05, size * 0.1, size * 0.07);
+    p.ellipse(size * 0.1, -size * 0.1, size * 0.12, size * 0.08);
+    p.ellipse(size * 0.25, size * 0.07, size * 0.07, size * 0.05);
+
+    p.pop();
+}
 
   // 水の波紋を描画する関数
   const drawWaterRipple = (x: number, y: number, size: number, age: number) => {
