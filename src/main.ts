@@ -1,22 +1,21 @@
 import p5 from 'p5';
 
-// 胴体部分を描画する関数
-const drawBody = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+// 尾びれ部分を描画する関数
+const drawTailFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
   p.push();
   p.translate(x, y);
 
-  // 体の動きに合わせて少し揺らす
-  const bodyOffsetX = p.sin(tailAngle * 0.5) * 3;
-  const bodyOffsetY = p.cos(tailAngle * 0.3) * 2;
-  p.translate(bodyOffsetX, bodyOffsetY);
+  // 尾びれの動きを表現
+  const tailOffsetX = p.sin(tailAngle) * 10;
+  p.translate(tailOffsetX, 0);
 
   p.scale((direction * size) / 1000, size / 1000);
 
-  // 胴体の色
+  // 尾びれの色
   p.fill(255, 45, 45);
   p.noStroke();
 
-  // 胴体のポイント
+  // 尾びれのポイント
   p.beginShape();
   p.vertex(890.004, 157.419);
   p.vertex(870.0, 165.0);
@@ -124,8 +123,8 @@ const drawRightFin = (p: p5, x: number, y: number, size: number, direction: numb
 
   p.scale((direction * size) / 1000, size / 1000);
 
-  // びれの色 (少し透明度を持たせる)
-  p.fill(255, 100, 100, 200);
+  // びれの色
+  p.fill(255, 45, 45);
   p.noStroke();
 
   // 右胸びれのポイント
@@ -166,8 +165,8 @@ const drawLeftFin = (p: p5, x: number, y: number, size: number, direction: numbe
 
   p.scale((direction * size) / 1000, size / 1000);
 
-  // びれの色 (少し透明度を持たせる)
-  p.fill(255, 100, 100, 200);
+  // びれの色
+  p.fill(255, 45, 45);
   p.noStroke();
 
   // 左胸びれのポイント
@@ -191,22 +190,23 @@ const drawLeftFin = (p: p5, x: number, y: number, size: number, direction: numbe
   p.pop();
 };
 
-// 尾びれを描画する関数
-const drawTailFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+// 胴体を描画する関数
+const drawBody = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
   p.push();
   p.translate(x, y);
 
-  // 尾びれの動きを表現
-  const tailOffsetX = p.sin(tailAngle) * 10;
-  p.translate(tailOffsetX, 0);
+  // 体の動きに合わせて少し揺らす
+  const bodyOffsetX = p.sin(tailAngle * 0.5) * 3;
+  const bodyOffsetY = p.cos(tailAngle * 0.3) * 2;
+  p.translate(bodyOffsetX, bodyOffsetY);
 
   p.scale((direction * size) / 1000, size / 1000);
 
-  // 尾びれの色 (少し透明度を持たせる)
-  p.fill(255, 80, 80, 180);
+  // 胴体の色
+  p.fill(255, 45, 45);
   p.noStroke();
 
-  // 尾びれのポイント
+  // 胴体のポイント
   p.beginShape();
   p.vertex(965.647, 122.736);
   p.vertex(970.0, 126.0);
