@@ -2,11 +2,8 @@ import p5 from 'p5';
 
 // 金魚の色定義インターフェース
 interface GoldfishColors {
-  // 体やひれの輪郭線の色
   stroke: [number, number, number];
-  // 体やひれの内部の色
   fill: [number, number, number];
-  // 尾びれのグラデーション色
   tailGradient: {
     start: [number, number, number];
     stop1: [number, number, number];
@@ -16,7 +13,7 @@ interface GoldfishColors {
   };
 }
 
-// 5色の金魚の色情報 - SVGファイルから抽出した正確な色情報
+// 5色の金魚の色情報 - SVGファイルの正確な色情報
 const goldfishColorSchemes: GoldfishColors[] = [
   // 赤い金魚 (red.svg)
   {
@@ -27,7 +24,7 @@ const goldfishColorSchemes: GoldfishColors[] = [
       stop1: [239, 104, 119],  // #EF6877
       stop2: [246, 168, 221],  // #F6A8DD
       stop3: [248, 187, 228],  // #F8BBE4
-      end: [255, 255, 255]     // #FFFFFF (白)
+      end: [255, 255, 255]     // #FFFFFF
     }
   },
   // 緑の金魚 (green.svg)
@@ -39,7 +36,7 @@ const goldfishColorSchemes: GoldfishColors[] = [
       stop1: [108, 203, 129],  // #6CCB81
       stop2: [167, 224, 178],  // #A7E0B2
       stop3: [197, 235, 204],  // #C5EBCC
-      end: [255, 255, 255]     // #FFFFFF (白)
+      end: [255, 255, 255]     // #FFFFFF
     }
   },
   // 青い金魚 (blue.svg)
@@ -51,7 +48,7 @@ const goldfishColorSchemes: GoldfishColors[] = [
       stop1: [108, 142, 203],  // #6C8ECB
       stop2: [167, 186, 224],  // #A7BAE0
       stop3: [197, 209, 235],  // #C5D1EB
-      end: [255, 255, 255]     // #FFFFFF (白)
+      end: [255, 255, 255]     // #FFFFFF
     }
   },
   // 黄色の金魚 (yellow.svg)
@@ -63,7 +60,7 @@ const goldfishColorSchemes: GoldfishColors[] = [
       stop1: [241, 199, 77],    // #F1C74D
       stop2: [246, 221, 149],   // #F6DD95
       stop3: [248, 231, 182],   // #F8E7B6
-      end: [255, 255, 255]      // #FFFFFF (白)
+      end: [255, 255, 255]      // #FFFFFF
     }
   },
   // 紫の金魚 (purple.svg)
@@ -75,74 +72,74 @@ const goldfishColorSchemes: GoldfishColors[] = [
       stop1: [180, 108, 203],   // #B46CCB
       stop2: [211, 167, 224],   // #D3A7E0
       stop3: [226, 197, 235],   // #E2C5EB
-      end: [255, 255, 255]      // #FFFFFF (白)
+      end: [255, 255, 255]      // #FFFFFF
     }
   }
 ];
 
 // 尾びれを描画する関数 - 色を引数で受け取るよう修正
 const drawTailFin = (
-  p: p5, 
-  x: number, 
-  y: number, 
-  size: number, 
-  direction: number, 
-  tailAngle: number, 
+  p: p5,
+  x: number,
+  y: number,
+  size: number,
+  direction: number,
+  tailAngle: number,
   colors: GoldfishColors
 ) => {
   p.push();
   p.translate(x, y);
-  
+
   // スケーリングを先に適用
   p.scale((direction * size) / 1000, size / 1000);
-  
+
   // 胴体との接合点を基準に設定
   const pivotX = 890.004; // 胴体との接合点
   const pivotY = 157.419;
-  
+
   // 輪郭線の色を設定
   p.stroke(colors.stroke[0], colors.stroke[1], colors.stroke[2]);
   p.strokeWeight(1);
-  
+
   // 尾びれのグラデーション - 接合部から先端に向かって薄くなるように設定
   const tailGradient = p.drawingContext as CanvasRenderingContext2D;
-  
+
   // グラデーションの方向を接合点から先端方向に設定
   const gradient = tailGradient.createLinearGradient(890, 157, 750, 100);
-  
+
   // 色の順序: 接合部は濃い色、先端に向かって薄くなる
   gradient.addColorStop(0, p.color(
-    colors.tailGradient.start[0], 
-    colors.tailGradient.start[1], 
-    colors.tailGradient.start[2], 
+    colors.tailGradient.start[0],
+    colors.tailGradient.start[1],
+    colors.tailGradient.start[2],
     255
   ).toString());
-  
+
   gradient.addColorStop(0.3, p.color(
-    colors.tailGradient.stop1[0], 
-    colors.tailGradient.stop1[1], 
-    colors.tailGradient.stop1[2], 
+    colors.tailGradient.stop1[0],
+    colors.tailGradient.stop1[1],
+    colors.tailGradient.stop1[2],
     255
   ).toString());
-  
+
   gradient.addColorStop(0.64, p.color(
-    colors.tailGradient.stop2[0], 
-    colors.tailGradient.stop2[1], 
-    colors.tailGradient.stop2[2], 
+    colors.tailGradient.stop2[0],
+    colors.tailGradient.stop2[1],
+    colors.tailGradient.stop2[2],
     255
   ).toString());
-  
+
   gradient.addColorStop(0.84, p.color(
-    colors.tailGradient.stop3[0], 
-    colors.tailGradient.stop3[1], 
-    colors.tailGradient.stop3[2], 
+    colors.tailGradient.stop3[0],
+    colors.tailGradient.stop3[1],
+    colors.tailGradient.stop3[2],
     255
   ).toString());
-  
+
   gradient.addColorStop(1, p.color(
-    colors.tailGradient.end[0], 
-    colors.tailGradient.end[1], 
-    colors.tailGradient.end[2], 
+    colors.tailGradient.end[0],
+    colors.tailGradient.end[1],
+    colors.tailGradient.end[2],
     255
   ).toString());
   
@@ -420,15 +417,14 @@ class Goldfish {
   phaseOffset: number;
   isTurning: boolean;
   tailWaveSpeed: number;
-  colorScheme: GoldfishColors; // 色情報を追加
+  colorScheme: GoldfishColors;
 
   constructor(
     p: p5, 
     x: number, 
     y: number, 
-    size: number, 
     direction: number, 
-    colorIndex: number, // 色のインデックスを追加
+    colorIndex: number,
     phaseOffset: number = 0
   ) {
     this.p = p;
@@ -436,28 +432,26 @@ class Goldfish {
     this.y = y;
     this.targetX = x;
     this.targetY = y;
-    this.size = size;
+    // すべての金魚のサイズを統一（元の赤い金魚の1.5倍）
+    this.size = 600; // 元のサイズ400の1.5倍
     this.direction = direction;
     this.targetDirection = direction;
     this.turningSpeed = 0.1;
     this.speed = p.random(0.01, 0.03);
     this.phaseOffset = phaseOffset;
     this.isTurning = false;
-    this.tailWaveSpeed = p.random(3, 4.5); // 尾びれの揺れの速さをより自然に調整
+    this.tailWaveSpeed = p.random(3, 4.5);
     
-    // 色スキームを設定（インデックスが範囲外の場合は0にする）
     const validColorIndex = colorIndex >= 0 && colorIndex < goldfishColorSchemes.length 
       ? colorIndex 
       : 0;
     this.colorScheme = goldfishColorSchemes[validColorIndex];
 
-    // 時々新しい目標地点を設定
     setInterval(() => {
       this.newTarget();
     }, p.random(3000, 8000));
   }
 
-  // 以下のメソッドは変更なし
   newTarget() {
     // 画面内の新しいランダムな目標位置を設定
     this.targetX = this.p.random(this.size, this.p.width - this.size);
@@ -558,7 +552,7 @@ class Goldfish {
   }
 }
 
-// p5.jsスケッチの設定
+// p5.jsスケッチ
 const sketch = (p: p5) => {
   let goldfishes: Goldfish[] = [];
   let time = 0;
@@ -566,13 +560,13 @@ const sketch = (p: p5) => {
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight);
 
-    // 5匹の金魚を初期化（異なる色、大きさ、位置）
+    // 5匹の金魚を初期化（同じサイズ、異なる色と位置）
     goldfishes = [
-      new Goldfish(p, p.width * 0.5, p.height * 0.5, 400, 1, 0, 0),      // 赤い金魚
-      new Goldfish(p, p.width * 0.3, p.height * 0.7, 250, -1, 1, 2),     // 緑の金魚
-      new Goldfish(p, p.width * 0.7, p.height * 0.3, 200, 1, 2, 4),      // 青い金魚
-      new Goldfish(p, p.width * 0.2, p.height * 0.4, 300, -1, 3, 1),     // 黄色の金魚
-      new Goldfish(p, p.width * 0.8, p.height * 0.6, 350, 1, 4, 3)       // 紫の金魚
+      new Goldfish(p, p.width * 0.5, p.height * 0.5, 1, 0, 0),      // 赤い金魚
+      new Goldfish(p, p.width * 0.3, p.height * 0.7, -1, 1, 2),     // 緑の金魚
+      new Goldfish(p, p.width * 0.7, p.height * 0.3, 1, 2, 4),      // 青い金魚
+      new Goldfish(p, p.width * 0.2, p.height * 0.4, -1, 3, 1),     // 黄色の金魚
+      new Goldfish(p, p.width * 0.8, p.height * 0.6, 1, 4, 3)       // 紫の金魚
     ];
   };
 
