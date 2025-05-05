@@ -410,27 +410,6 @@ const drawLeftFin = (
   p.pop();
 };
 
-// 金魚を描画するメイン関数（垂直角度を追加）
-const drawGoldfish = (
-  p: p5,
-  x: number,
-  y: number,
-  size: number,
-  tailAngle: number,
-  direction: number,
-  colors: GoldfishColors,
-  verticalAngle: number = 0 // 垂直方向の角度を追加
-) => {
-  // 描画順序: 尾びれ→胴体→胸びれ
-  // 尾びれは最も背面のレイヤー
-  drawTailFin(p, x, y, size, direction, tailAngle, colors, verticalAngle);
-  // 次に胴体
-  drawBody(p, x, y, size, direction, tailAngle, colors, verticalAngle);
-  // 胸びれは最前面に
-  drawRightFin(p, x, y, size, direction, tailAngle, colors, verticalAngle);
-  drawLeftFin(p, x, y, size, direction, tailAngle, colors, verticalAngle);
-};
-
 // 波紋を表すクラス（変更なし）
 class Ripple {
   p: p5;
