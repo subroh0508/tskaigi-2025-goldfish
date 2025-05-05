@@ -402,7 +402,60 @@ const drawGoldfish = (
   drawLeftFin(p, x, y, size, direction, tailAngle, colors);
 };
 
-// 金魚のクラス - 色情報を追加
+// 波紋を表すクラス（色を統一）
+class Ripple {
+  p: p5;
+  x: number;
+  y: number;
+  radius: number;
+  maxRadius: number;
+  speed: number;
+  alpha: number;
+  // 統一された波紋の色を固定値に
+  color: [number, number, number];
+
+  constructor(p: p5, x: number, y: number) {
+    this.p = p;
+    this.x = x;
+    this.y = y;
+    this.radius = 10;
+    this.maxRadius = p.random(100, 180);
+    this.speed = p.random(1.2, 2.2);
+    this.alpha = 128; // 0.5に相当する透明度
+    // 指定された青色（rgb(59, 130, 246)）を使用
+    this.color = [59, 130, 246];
+  }
+
+  // 波紋を更新
+  update() {
+    this.radius += this.speed;
+
+    // 徐々に透明になる（初期値は0.5=128から開始）
+    this.alpha = this.p.map(this.radius, 0, this.maxRadius, 128, 0);
+
+    return this.radius < this.maxRadius;
+  }
+
+  // 波紋を描画
+  draw() {
+    this.p.push();
+    this.p.noFill();
+
+    // 指定された色と透明度を設定
+    this.p.stroke(
+      this.color[0],
+      this.color[1],
+      this.color[2],
+      this.alpha
+    );
+
+    this.p.strokeWeight(2);
+    this.p.circle(this.x, this.y, this.radius * 2);
+    this.p.pop();
+  }
+}
+
+// 金魚のクラス（波紋生成を簡素化）
 class Goldfish {
   p: p5;
   x: number;
@@ -418,30 +471,33 @@ class Goldfish {
   isTurning: boolean;
   tailWaveSpeed: number;
   colorScheme: GoldfishColors;
-  // 境界判定用の安全マージンを追加
   safeMargin: number;
+  // 移動開始フラグを追加
+  hasStartedMoving: boolean;
+  // 前回の目標地点を記録
+  lastTargetX: number;
+  lastTargetY: number;
 
   constructor(
-    p: p5, 
-    x: number, 
-    y: number, 
-    direction: number, 
+    p: p5,
+    x: number,
+    y: number,
+    direction: number,
     colorIndex: number,
     phaseOffset: number = 0
   ) {
     this.p = p;
-    this.size = 600; // 全ての金魚を同じサイズに
-    
-    // 金魚の描画時の実際の幅を考慮したマージン
-    // 金魚の形状を考慮して、サイズの半分よりも大きめに設定
+    this.size = 600;
     this.safeMargin = this.size * 0.6;
-    
-    // 初期位置が安全範囲内に収まるよう制約
+
     this.x = p.constrain(x, this.safeMargin, p.width - this.safeMargin);
     this.y = p.constrain(y, this.safeMargin, p.height - this.safeMargin);
-    
+
     this.targetX = this.x;
     this.targetY = this.y;
+    this.lastTargetX = this.x;
+    this.lastTargetY = this.y;
+
     this.direction = direction;
     this.targetDirection = direction;
     this.turningSpeed = 0.1;
@@ -449,43 +505,66 @@ class Goldfish {
     this.phaseOffset = phaseOffset;
     this.isTurning = false;
     this.tailWaveSpeed = p.random(3, 4.5);
-    
-    const validColorIndex = colorIndex >= 0 && colorIndex < goldfishColorSchemes.length 
-      ? colorIndex 
+
+    // 移動開始フラグを初期化
+    this.hasStartedMoving = false;
+
+    const validColorIndex = colorIndex >= 0 && colorIndex < goldfishColorSchemes.length
+      ? colorIndex
       : 0;
     this.colorScheme = goldfishColorSchemes[validColorIndex];
 
-    // 新しい目標地点を設定するタイマー
+    // 一定間隔で新しい目標地点を設定
     setInterval(() => {
       this.newTarget();
     }, p.random(3000, 8000));
   }
 
-  // 新しい目標位置の設定（安全マージンを考慮）
+  // 新しい目標位置を設定（波紋を生成するフラグをリセット）
   newTarget() {
-    // 画面内の安全な範囲でランダムな目標位置を設定
+    // 前回の目標地点を記録
+    this.lastTargetX = this.targetX;
+    this.lastTargetY = this.targetY;
+
+    // 新しい目標地点を設定
     this.targetX = this.p.random(this.safeMargin, this.p.width - this.safeMargin);
     this.targetY = this.p.random(this.safeMargin, this.p.height - this.safeMargin);
 
-    // 目標地点が現在の位置の左側なら向きを左に、右側なら向きを右に
+    // 目標地点に応じて向きを設定
     if (this.targetX < this.x) {
       this.targetDirection = -1;
     } else {
       this.targetDirection = 1;
     }
 
-    // 方向転換が必要な場合は、方向転換中フラグを立てる
+    // 方向転換が必要な場合はフラグを立てる
     if (this.targetDirection !== this.direction) {
       this.isTurning = true;
     }
+
+    // 移動開始フラグをリセット
+    this.hasStartedMoving = false;
   }
 
-  // 位置の更新（境界判定を強化）
-  update(time: number) {
-    // 方向の更新（滑らかに目標の向きに変化）
+  // 波紋を生成するメソッド（移動開始時のみ）
+  createRipple(ripples: Ripple[]) {
+    // 新しい目標位置に向かって移動を開始した最初のフレームでのみ波紋を生成
+    if (!this.hasStartedMoving) {
+      // 目標地点と現在地点の距離が十分あるときのみ波紋を表示
+      const distance = this.p.dist(this.x, this.y, this.targetX, this.targetY);
+      if (distance > 50) {
+        ripples.push(new Ripple(this.p, this.x, this.y));
+        this.hasStartedMoving = true;
+      }
+    }
+  }
+
+  // 位置の更新（波紋生成を簡素化）
+  update(time: number, ripples: Ripple[]) {
+    // 方向の更新
     if (this.direction !== this.targetDirection) {
       this.direction = this.p.lerp(this.direction, this.targetDirection, this.turningSpeed);
-      
+
       if (Math.abs(this.direction - this.targetDirection) < 0.05) {
         this.direction = this.targetDirection;
         this.isTurning = false;
@@ -495,62 +574,65 @@ class Goldfish {
     // 移動速度の計算
     const currentSpeed = this.isTurning ? this.speed * 0.7 : this.speed;
 
+    // 現在位置を記録（移動前）
+    const oldX = this.x;
+    const oldY = this.y;
+
     // 次の位置を計算
     let nextX = this.p.lerp(this.x, this.targetX, currentSpeed);
     let nextY = this.p.lerp(this.y, this.targetY, currentSpeed);
 
-    // 境界判定を先に行い、画面外に出る前に方向転換させる
+    // 境界判定
     if (nextX < this.safeMargin) {
-      // 左端に近づいたら、右方向に方向転換
       nextX = this.safeMargin;
       this.targetX = this.p.random(this.p.width * 0.4, this.p.width * 0.8);
       this.targetDirection = 1;
       this.isTurning = true;
+      this.hasStartedMoving = false; // 新しい移動の開始をマーク
     } else if (nextX > this.p.width - this.safeMargin) {
-      // 右端に近づいたら、左方向に方向転換
       nextX = this.p.width - this.safeMargin;
       this.targetX = this.p.random(this.p.width * 0.2, this.p.width * 0.6);
       this.targetDirection = -1;
       this.isTurning = true;
+      this.hasStartedMoving = false; // 新しい移動の開始をマーク
     }
 
     if (nextY < this.safeMargin) {
-      // 上端に近づいたら、下方向に方向転換
       nextY = this.safeMargin;
       this.targetY = this.p.random(this.p.height * 0.4, this.p.height * 0.8);
+      this.hasStartedMoving = false; // 新しい移動の開始をマーク
     } else if (nextY > this.p.height - this.safeMargin) {
-      // 下端に近づいたら、上方向に方向転換
       nextY = this.p.height - this.safeMargin;
       this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.6);
+      this.hasStartedMoving = false; // 新しい移動の開始をマーク
     }
 
     // 更新された位置を適用
     this.x = nextX;
     this.y = nextY;
+
+    // 波紋を生成（移動開始時のみ）
+    this.createRipple(ripples);
   }
 
-  // 描画処理
+  // 描画処理（変更なし）
   draw(time: number) {
-    // 尾びれの動きの計算
     let tailAngle = this.p.sin(time * this.tailWaveSpeed + this.phaseOffset) * 0.7;
 
-    // 方向転換中は尾びれの動きを強調
     if (this.isTurning) {
       const turningProgress = Math.abs(this.direction - this.targetDirection);
       const turnEffect = (this.targetDirection - this.direction) * 0.8;
       tailAngle += turnEffect * Math.sin(time * 8) * turningProgress;
     }
 
-    // 速度に応じて尾びれの動きを調整
     const speedFactor = this.p.map(
       this.p.dist(this.x, this.y, this.targetX, this.targetY),
       0, this.p.width * 0.3,
       1, 1.8
     );
 
-    tailAngle *= Math.min(speedFactor, 1.8); // 最大値を制限
+    tailAngle *= Math.min(speedFactor, 1.8);
 
-    // 金魚を描画
     drawGoldfish(this.p, this.x, this.y, this.size, tailAngle, this.direction, this.colorScheme);
   }
 }
@@ -558,41 +640,41 @@ class Goldfish {
 // p5.jsスケッチ
 const sketch = (p: p5) => {
   let goldfishes: Goldfish[] = [];
+  let ripples: Ripple[] = [];
   let time = 0;
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight);
 
     // 画面サイズに基づいて安全に配置
-    const safeMargin = 600 * 0.6; // 金魚サイズに基づく安全マージン
-    
-    // 画面内の安全な領域に初期位置を設定
+    const safeMargin = 600 * 0.6;
+
     goldfishes = [
       // 中央
       new Goldfish(p, p.width * 0.5, p.height * 0.5, 1, 0, 0),
-      
-      // 左上（安全マージンを考慮）
-      new Goldfish(p, 
-        p.random(safeMargin, p.width * 0.4), 
-        p.random(safeMargin, p.height * 0.4), 
+
+      // 左上
+      new Goldfish(p,
+        p.random(safeMargin, p.width * 0.4),
+        p.random(safeMargin, p.height * 0.4),
         -1, 1, 2),
-      
+
       // 右上
-      new Goldfish(p, 
-        p.random(p.width * 0.6, p.width - safeMargin), 
-        p.random(safeMargin, p.height * 0.4), 
+      new Goldfish(p,
+        p.random(p.width * 0.6, p.width - safeMargin),
+        p.random(safeMargin, p.height * 0.4),
         1, 2, 4),
-      
+
       // 左下
-      new Goldfish(p, 
-        p.random(safeMargin, p.width * 0.4), 
-        p.random(p.height * 0.6, p.height - safeMargin), 
+      new Goldfish(p,
+        p.random(safeMargin, p.width * 0.4),
+        p.random(p.height * 0.6, p.height - safeMargin),
         -1, 3, 1),
-      
+
       // 右下
-      new Goldfish(p, 
-        p.random(p.width * 0.6, p.width - safeMargin), 
-        p.random(p.height * 0.6, p.height - safeMargin), 
+      new Goldfish(p,
+        p.random(p.width * 0.6, p.width - safeMargin),
+        p.random(p.height * 0.6, p.height - safeMargin),
         1, 4, 3)
     ];
   };
@@ -604,9 +686,19 @@ const sketch = (p: p5) => {
     // 時間を更新
     time += 0.01;
 
+    // 波紋を描画（金魚の下に描画）
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      ripples[i].draw();
+
+      // 波紋が寿命を迎えたら削除
+      if (!ripples[i].update()) {
+        ripples.splice(i, 1);
+      }
+    }
+
     // 各金魚を更新・描画
     goldfishes.forEach(fish => {
-      fish.update(time);
+      fish.update(time, ripples);
       fish.draw(time);
     });
   };
@@ -614,17 +706,14 @@ const sketch = (p: p5) => {
   p.windowResized = () => {
     p.resizeCanvas(p.windowWidth, p.windowHeight);
 
-    // ウィンドウリサイズ時に金魚の位置を調整
     goldfishes.forEach(fish => {
-      // 画面の新しいサイズに基づいて位置を制約
       fish.x = p.constrain(fish.x, fish.safeMargin, p.width - fish.safeMargin);
       fish.y = p.constrain(fish.y, fish.safeMargin, p.height - fish.safeMargin);
-      
-      // 画面が小さくなりすぎた場合は、新しい目標地点も調整
-      if (fish.targetX < fish.safeMargin || 
-          fish.targetX > p.width - fish.safeMargin ||
-          fish.targetY < fish.safeMargin || 
-          fish.targetY > p.height - fish.safeMargin) {
+
+      if (fish.targetX < fish.safeMargin ||
+        fish.targetX > p.width - fish.safeMargin ||
+        fish.targetY < fish.safeMargin ||
+        fish.targetY > p.height - fish.safeMargin) {
         fish.newTarget();
       }
     });
