@@ -68,7 +68,7 @@ const drawBody = (p: p5, x: number, y: number, size: number, direction: number, 
   p.vertex(908.145, 190.272);
   p.vertex(897.281, 182.4);
   p.vertex(890.873, 170.214);
-  p.vertex(890.004, 157.419);
+  p.vertex(890.004, 157.419); // 尾びれとの接合点を厳密に一致させる
   p.endShape(p.CLOSE);
   
   p.pop();
@@ -79,13 +79,14 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
   p.push();
   p.translate(x, y);
   
-  // 尾びれの動きを表現
-  const tailOffsetX = p.sin(tailAngle) * 10;
-  p.translate(tailOffsetX, 0);
-  
+  // スケーリングを先に適用
   p.scale((direction * size) / 1000, size / 1000);
   
-  // 輪郭線の色を赤に設定（尾びれの色に合わせる）
+  // 胴体との接合点を基準に設定
+  const pivotX = 890.004; // 胴体との接合点
+  const pivotY = 157.419;
+  
+  // 輪郭線の色を赤に設定
   p.stroke(237, 81, 81);
   p.strokeWeight(1);
   
@@ -100,48 +101,88 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
   
   tailGradient.fillStyle = gradient;
   
-  // 尾びれのポイント（SVGから抽出）
+  // 尾びれのポイント
   p.beginShape();
-  p.vertex(890.004, 157.419);
-  p.vertex(814.976, 185.631);
-  p.vertex(771.909, 161.867);
-  p.vertex(770.452, 161.233);
-  p.vertex(781.503, 157.209);
-  p.vertex(781.198, 156.457);
-  p.vertex(797.552, 152.503);
-  p.vertex(788.409, 146.179);
-  p.vertex(790.701, 142.914);
-  p.vertex(796.435, 141.095);
-  p.vertex(787.894, 130.726);
-  p.vertex(787.814, 130.629);
-  p.vertex(777.753, 123.826);
-  p.vertex(790.151, 117.351);
-  p.vertex(804.588, 109.812);
-  p.vertex(825.205, 116.468);
-  p.vertex(853.445, 125.119);
-  p.vertex(842.439, 117.101);
-  p.vertex(830.823, 106.324);
-  p.vertex(812.122, 95.282);
-  p.vertex(761.274, 65.258);
-  p.vertex(718.828, 94.522);
-  p.vertex(705.022, 102.241);
-  p.vertex(733.686, 79.71);
-  p.vertex(737.701, 77.332);
-  p.vertex(780.962, 72.119);
-  p.vertex(754.5, 64.541);
-  p.vertex(750.854, 64.962);
-  p.vertex(702.517, 69.802);
-  p.vertex(702.567, 69.741);
-  p.vertex(718.829, 40.534);
-  p.vertex(762.159, 37.332);
-  p.vertex(770.489, 36.716);
-  p.vertex(813.308, 34.634);
-  p.vertex(850.541, 61.166);
-  p.vertex(880.577, 82.57);
-  p.vertex(885.404, 94.639);
-  p.vertex(910.206, 117.274);
-  p.endShape(p.CLOSE);
   
+  // 接合点のポイント（動かさない）
+  p.vertex(pivotX, pivotY);
+  
+  // 尾びれの各ポイント
+  const tailPoints = [
+    [814.976, 185.631],
+    [771.909, 161.867],
+    [770.452, 161.233],
+    [781.503, 157.209],
+    [781.198, 156.457],
+    [797.552, 152.503],
+    [788.409, 146.179],
+    [790.701, 142.914],
+    [796.435, 141.095],
+    [787.894, 130.726],
+    [787.814, 130.629],
+    [777.753, 123.826],
+    [790.151, 117.351],
+    [804.588, 109.812],
+    [825.205, 116.468],
+    [853.445, 125.119],
+    [842.439, 117.101],
+    [830.823, 106.324],
+    [812.122, 95.282],
+    [761.274, 65.258],
+    [718.828, 94.522],
+    [705.022, 102.241],
+    [733.686, 79.71],
+    [737.701, 77.332],
+    [780.962, 72.119],
+    [754.5, 64.541],
+    [750.854, 64.962],
+    [702.517, 69.802],
+    [702.567, 69.741],
+    [718.829, 40.534],
+    [762.159, 37.332],
+    [770.489, 36.716],
+    [813.308, 34.634],
+    [850.541, 61.166],
+    [880.577, 82.57],
+    [885.404, 94.639],
+    [910.206, 117.274]
+  ];
+  
+  // 各ポイントに変形を適用
+  for (const point of tailPoints) {
+    // 接合点からの距離を計算
+    const dx = point[0] - pivotX;
+    const dy = point[1] - pivotY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // 左右方向のベクトルを計算（金魚の向きに垂直な方向）
+    // direction > 0 なら右向き、< 0 なら左向き
+    // 従って左右の振動方向は金魚の向きに対して垂直
+    const sideDirectionX = -dy * direction; // 垂直方向ベクトルのX成分
+    const sideDirectionY = dx * direction;  // 垂直方向ベクトルのY成分
+    
+    // 単位ベクトル化
+    const sideMagnitude = Math.sqrt(sideDirectionX * sideDirectionX + sideDirectionY * sideDirectionY);
+    const unitSideX = sideDirectionX / sideMagnitude;
+    const unitSideY = sideDirectionY / sideMagnitude;
+    
+    // 距離が遠いほど変形が大きくなるようにする
+    const maxDistance = 200;
+    const normalizedDist = Math.min(distance / maxDistance, 1);
+    const influence = normalizedDist * normalizedDist * 1.8; // 二次関数的な影響度、さらに強調
+    
+    // サイン波による横方向（金魚の体に対して垂直方向）の変位
+    const sideOffset = Math.sin(tailAngle) * influence * distance * 0.35;
+    
+    // 左右方向の変位を計算
+    const xOffset = unitSideX * sideOffset;
+    const yOffset = unitSideY * sideOffset;
+    
+    // 変形後の座標を計算
+    p.vertex(point[0] + xOffset, point[1] + yOffset);
+  }
+  
+  p.endShape(p.CLOSE);
   p.pop();
 };
 
@@ -266,7 +307,7 @@ class Goldfish {
     this.speed = p.random(0.01, 0.03);
     this.phaseOffset = phaseOffset;
     this.isTurning = false;
-    this.tailWaveSpeed = p.random(4, 6); // 尾びれの揺れの速さをランダムに
+    this.tailWaveSpeed = p.random(3, 4.5); // 尾びれの揺れの速さをより自然に調整
 
     // 時々新しい目標地点を設定
     setInterval(() => {
@@ -345,8 +386,8 @@ class Goldfish {
   }
 
   draw(time: number) {
-    // 基本の尾びれの動き（サインカーブで揺れるように）
-    let tailAngle = this.p.sin(time * this.tailWaveSpeed + this.phaseOffset) * 0.2;
+    // より滑らかな尾びれの動き
+    let tailAngle = this.p.sin(time * this.tailWaveSpeed + this.phaseOffset) * 0.7;
 
     // 方向転換中は尾びれの動きを強調
     if (this.isTurning) {
@@ -354,11 +395,20 @@ class Goldfish {
       const turningProgress = Math.abs(this.direction - this.targetDirection);
 
       // 方向転換中は尾びれをより大きく振る（ターンの方向と逆に）
-      const turnEffect = (this.targetDirection - this.direction) * 0.3;
+      const turnEffect = (this.targetDirection - this.direction) * 0.8;
 
       // 通常の尾びれの動きに方向転換の効果を加える
-      tailAngle += turnEffect * Math.sin(time * 10) * turningProgress;
+      tailAngle += turnEffect * Math.sin(time * 8) * turningProgress;
     }
+
+    // 速度に応じて尾びれの動きを調整（速く泳ぐほど大きく振る）
+    const speedFactor = this.p.map(
+      this.p.dist(this.x, this.y, this.targetX, this.targetY),
+      0, this.p.width * 0.3,
+      1, 1.8
+    );
+    
+    tailAngle *= Math.min(speedFactor, 1.8); // 最大値を制限
 
     // 金魚を描画
     drawGoldfish(this.p, this.x, this.y, this.size, tailAngle, this.direction);
