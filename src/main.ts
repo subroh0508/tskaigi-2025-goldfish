@@ -479,6 +479,11 @@ class Goldfish {
   lastTargetY: number;
   movementType: string; // 動きのタイプ
   movementTimer: number; // 特殊な動きのタイマー
+  verticalMovementProbability: number; // 上下の動きの発生確率
+  verticalFlipTimer: number; // 垂直方向の90度回転のタイマー
+  isFlipping: boolean; // 90度回転中フラグ
+  flipDuration: number; // 回転完了までの時間
+  flipDirection: number; // 回転方向（上or下）
 
   constructor(
     p: p5,
@@ -515,6 +520,13 @@ class Goldfish {
     this.hasStartedMoving = false;
     this.movementType = 'normal';
     this.movementTimer = 0;
+    this.verticalMovementProbability = 0.6; // 60%の確率で上下の動きを発生させる
+
+    // 90度回転関連のプロパティ
+    this.verticalFlipTimer = 0;
+    this.isFlipping = false;
+    this.flipDuration = 0;
+    this.flipDirection = 0;
 
     const validColorIndex = colorIndex >= 0 && colorIndex < goldfishColorSchemes.length
       ? colorIndex
@@ -523,21 +535,108 @@ class Goldfish {
 
     // 一定間隔で新しい目標地点を設定
     setInterval(() => {
-      this.newTarget();
+      if (!this.isFlipping) { // 回転中でなければ新しい目標を設定
+        this.newTarget();
+      }
     }, p.random(3000, 8000));
 
     // 不定期に特殊な動きを発生させる
     setInterval(() => {
-      this.selectRandomMovement();
+      if (!this.isFlipping) { // 回転中でなければ特殊な動きを開始
+        this.selectRandomMovement();
+      }
     }, p.random(8000, 15000));
+
+    // 不定期に90度回転を発生させる
+    setInterval(() => {
+      // 10%の確率で90度回転を開始（低確率にして自然に）
+      if (!this.isFlipping && p.random() < 0.1) {
+        this.startVerticalFlip();
+      }
+    }, p.random(10000, 20000)); // 10〜20秒間隔でチェック
+  }
+
+  // 90度垂直回転を開始
+  startVerticalFlip() {
+    // 既に回転中または他の特殊動作中は開始しない
+    if (this.isFlipping || this.movementType !== 'normal') {
+      return;
+    }
+
+    this.isFlipping = true;
+
+    // 上か下か、ランダムに方向を決定
+    this.flipDirection = this.p.random() < 0.5 ? 1 : -1; // 1: 上向き、-1: 下向き
+
+    // 目標角度を設定（π/2 = 90度）
+    this.targetVerticalAngle = this.flipDirection * (Math.PI / 2);
+
+    // 回転の所要時間を設定（60〜120フレーム = 1〜2秒）
+    this.flipDuration = this.p.random(60, 120);
+    this.verticalFlipTimer = this.flipDuration;
+
+    // 速度を少し遅くする（回転中）
+    this.speed *= 0.5;
+
+    // 回転中は垂直方向の回転速度を速める
+    this.verticalTurningSpeed = 0.02;
+
+    // 回転に合わせて新しい目標位置も設定
+    const safeWidth = this.p.width - this.safeMargin * 2;
+    const safeHeight = this.p.height - this.safeMargin * 2;
+
+    // 回転方向に合わせて移動方向を設定
+    if (this.flipDirection > 0) { // 上向き
+      this.targetY = this.p.max(this.y - safeHeight * 0.3, this.safeMargin);
+    } else { // 下向き
+      this.targetY = this.p.min(this.y + safeHeight * 0.3, this.p.height - this.safeMargin);
+    }
+
+    // 左右方向はわずかに移動
+    this.targetX = this.p.constrain(
+      this.x + this.direction * safeWidth * 0.1,
+      this.safeMargin,
+      this.p.width - this.safeMargin
+    );
+
+    this.isVerticalTurning = true;
+    this.hasStartedMoving = false;
+  }
+
+  // 垂直回転の完了処理
+  completeVerticalFlip() {
+    this.isFlipping = false;
+
+    // 回転後は元の速度に戻す
+    this.speed *= 2;
+
+    // 回転速度を通常に戻す
+    this.verticalTurningSpeed = 0.05;
+
+    // 水平に戻る準備をする
+    this.targetVerticalAngle = 0;
+
+    // 新しい目標地点を設定
+    this.newTarget();
   }
 
   // ランダムな動きタイプを選択
   selectRandomMovement() {
-    // 動きのバリエーションを設定
-    const movements = ['normal', 'up', 'down', 'zigzag', 'quick_turn', 'circle'];
+    // 回転中は新しい動きを開始しない
+    if (this.isFlipping) return;
+
+    // 動きのバリエーションを設定（上下の動きの比率を高くする）
+    const movements = ['normal', 'up', 'down', 'up', 'down', 'zigzag', 'quick_turn', 'circle', 'vertical_flip'];
     const randomIndex = Math.floor(this.p.random(movements.length));
-    this.movementType = movements[randomIndex];
+    const selectedMovement = movements[randomIndex];
+
+    // vertical_flipが選ばれた場合は90度回転を開始
+    if (selectedMovement === 'vertical_flip') {
+      this.startVerticalFlip();
+      return;
+    }
+
+    this.movementType = selectedMovement;
 
     // 特殊な動きの持続時間を設定
     if (this.movementType === 'normal') {
@@ -557,7 +656,7 @@ class Goldfish {
 
     switch (this.movementType) {
       case 'up':
-        // 上向きの動き
+        // 上向きの動き（Y座標を減らす＝上に移動）
         this.targetX = this.p.constrain(
           this.x + this.p.random(-safeWidth * 0.2, safeWidth * 0.2),
           this.safeMargin,
@@ -567,13 +666,13 @@ class Goldfish {
           this.y - this.p.random(safeHeight * 0.3, safeHeight * 0.5),
           this.safeMargin
         );
-        this.targetVerticalAngle = 0.5; // 上を向く（少し弱めに）
+        this.targetVerticalAngle = 0.5; // 上を向く
         // 左右方向も設定
         this.targetDirection = this.targetX < this.x ? -1 : 1;
         break;
 
       case 'down':
-        // 下向きの動き
+        // 下向きの動き（Y座標を増やす＝下に移動）
         this.targetX = this.p.constrain(
           this.x + this.p.random(-safeWidth * 0.2, safeWidth * 0.2),
           this.safeMargin,
@@ -583,44 +682,46 @@ class Goldfish {
           this.y + this.p.random(safeHeight * 0.3, safeHeight * 0.5),
           this.p.height - this.safeMargin
         );
-        this.targetVerticalAngle = -0.5; // 下を向く（少し弱めに）
+        this.targetVerticalAngle = -0.5; // 下を向く
         // 左右方向も設定
         this.targetDirection = this.targetX < this.x ? -1 : 1;
         break;
 
       case 'zigzag':
-        // 左右にジグザグする動き
+        // 左右にジグザグする動き（上下にもランダムな変化を追加）
         this.targetDirection = -this.direction;
         this.targetX = this.p.constrain(
           this.x + (this.targetDirection * safeWidth * 0.4),
           this.safeMargin,
           this.p.width - this.safeMargin
         );
+        // 上下方向にもランダムな移動
+        const verticalOffset = this.p.random(-safeHeight * 0.2, safeHeight * 0.2);
         this.targetY = this.p.constrain(
-          this.y + this.p.random(-safeHeight * 0.2, safeHeight * 0.2),
+          this.y + verticalOffset,
           this.safeMargin,
           this.p.height - this.safeMargin
         );
-        this.targetVerticalAngle = 0; // 水平方向
+        // 上下移動の方向に応じて角度を設定
+        this.targetVerticalAngle = verticalOffset < 0 ? 0.3 : (verticalOffset > 0 ? -0.3 : 0);
         break;
 
       case 'quick_turn':
-        // 素早い方向転換
+        // 素早い方向転換（その場で方向転換する）
         this.targetDirection = -this.direction;
         this.turningSpeed = 0.2; // 通常より速く回転
-        this.targetX = this.p.constrain(
-          this.x + (this.targetDirection * safeWidth * 0.3),
-          this.safeMargin,
-          this.p.width - this.safeMargin
-        );
+        this.targetX = this.x + (this.targetDirection * 20); // わずかに前進
         this.targetY = this.y;
-        this.targetVerticalAngle = 0;
+        // ランダムに上下の角度も変える
+        this.targetVerticalAngle = this.p.random(-0.3, 0.3);
         break;
 
       case 'circle':
-        // 円を描くような動き
+        // 円を描くような動き（上下方向も含む3D的な円運動）
         const circleRadius = Math.min(safeWidth, safeHeight) * 0.2;
         const angle = this.p.random(this.p.TWO_PI);
+
+        // X,Yともに円運動を適用
         this.targetX = this.p.constrain(
           this.x + circleRadius * Math.cos(angle),
           this.safeMargin,
@@ -631,9 +732,11 @@ class Goldfish {
           this.safeMargin,
           this.p.height - this.safeMargin
         );
+
         // 円を描く方向に応じて方向を決定
         this.targetDirection = Math.cos(angle) > 0 ? 1 : -1;
-        this.targetVerticalAngle = Math.sin(angle) * 0.3; // 上下にも少し傾ける（弱めに）
+        // 上下方向の角度は移動方向に基づいて設定
+        this.targetVerticalAngle = Math.sin(angle) * 0.5;
         break;
 
       default:
@@ -655,8 +758,11 @@ class Goldfish {
     this.isVerticalTurning = Math.abs(this.verticalAngle - this.targetVerticalAngle) > 0.1;
   }
 
-  // 新しい目標位置を設定（通常の動き用）
+  // 新しい目標位置を設定（通常の動き用、上下移動を強化）
   newTarget() {
+    // 回転中は新しい目標を設定しない
+    if (this.isFlipping) return;
+
     // 通常の動作に戻す
     this.movementType = 'normal';
     this.movementTimer = 0;
@@ -666,9 +772,35 @@ class Goldfish {
     this.lastTargetX = this.targetX;
     this.lastTargetY = this.targetY;
 
-    // 新しい目標地点を設定
+    // 新しい目標のX座標を設定
     this.targetX = this.p.random(this.safeMargin, this.p.width - this.safeMargin);
-    this.targetY = this.p.random(this.safeMargin, this.p.height - this.safeMargin);
+
+    // 一定確率で上下方向への移動も行う
+    if (this.p.random() < this.verticalMovementProbability) {
+      // 現在位置から上下どちらかにランダムに移動
+      const verticalDirection = this.p.random() < 0.5 ? -1 : 1; // 上か下かランダム
+      const verticalDistance = this.p.random(this.p.height * 0.2, this.p.height * 0.4);
+
+      // 新しいY座標を設定（画面内に収まるよう制約）
+      this.targetY = this.p.constrain(
+        this.y + (verticalDirection * verticalDistance),
+        this.safeMargin,
+        this.p.height - this.safeMargin
+      );
+
+      // 上下の角度を移動方向に応じて設定
+      this.targetVerticalAngle = (verticalDirection > 0) ? -0.4 : 0.4; // 下に行くときは下向き、上に行くときは上向き
+    } else {
+      // 左右方向のみ移動の場合は、Y座標をわずかにばらつかせる
+      this.targetY = this.p.constrain(
+        this.y + this.p.random(-this.p.height * 0.1, this.p.height * 0.1),
+        this.safeMargin,
+        this.p.height - this.safeMargin
+      );
+
+      // 水平に近い角度
+      this.targetVerticalAngle = this.p.random(-0.2, 0.2);
+    }
 
     // 目標地点に応じて左右の向きを設定
     if (this.targetX < this.x) {
@@ -676,9 +808,6 @@ class Goldfish {
     } else {
       this.targetDirection = 1;
     }
-
-    // ランダムに上下の角度も変える（より自然な動き、範囲を小さくする）
-    this.targetVerticalAngle = this.p.random(-0.3, 0.3);
 
     // 方向転換フラグを設定
     this.isTurning = this.targetDirection !== this.direction;
@@ -703,6 +832,40 @@ class Goldfish {
 
   // 位置の更新（上下の動きと特殊な動きを追加）
   update(time: number, ripples: Ripple[]) {
+    // 90度回転の処理
+    if (this.isFlipping) {
+      this.verticalFlipTimer--;
+
+      // 角度の更新（90度回転中は通常より速い回転速度）
+      const targetAngle = this.flipDirection * (Math.PI / 2);
+      this.verticalAngle = this.p.lerp(
+        this.verticalAngle,
+        targetAngle,
+        0.02
+      );
+
+      // 回転が完了に近づいたら
+      if (Math.abs(this.verticalAngle - targetAngle) < 0.1) {
+        // 回転タイマーが終了したら、回転を完了
+        if (this.verticalFlipTimer <= 0) {
+          this.completeVerticalFlip();
+        }
+      }
+
+      // 回転中も位置の更新は続ける（ただし通常より遅く）
+      let nextX = this.p.lerp(this.x, this.targetX, this.speed * 0.5);
+      let nextY = this.p.lerp(this.y, this.targetY, this.speed * 0.5);
+
+      // 境界チェック
+      nextX = this.p.constrain(nextX, this.safeMargin, this.p.width - this.safeMargin);
+      nextY = this.p.constrain(nextY, this.safeMargin, this.p.height - this.safeMargin);
+
+      this.x = nextX;
+      this.y = nextY;
+
+      return; // 回転中は他の動きの更新をスキップ
+    }
+
     // 特殊な動きのタイマーを減らす
     if (this.movementTimer > 0) {
       this.movementTimer--;
@@ -714,12 +877,27 @@ class Goldfish {
       // zigzagの場合は途中で方向転換
       else if (this.movementType === 'zigzag' && this.movementTimer % 60 === 0) {
         this.targetDirection = -this.targetDirection;
+
+        // X方向の移動
         this.targetX = this.p.constrain(
           this.x + (this.targetDirection * this.p.width * 0.3),
           this.safeMargin,
           this.p.width - this.safeMargin
         );
+
+        // Y方向もランダムに変化させる
+        const verticalOffset = this.p.random(-this.p.height * 0.15, this.p.height * 0.15);
+        this.targetY = this.p.constrain(
+          this.y + verticalOffset,
+          this.safeMargin,
+          this.p.height - this.safeMargin
+        );
+
+        // 上下の角度も変更
+        this.targetVerticalAngle = verticalOffset < 0 ? 0.3 : (verticalOffset > 0 ? -0.3 : 0);
+
         this.isTurning = true;
+        this.isVerticalTurning = true;
         this.hasStartedMoving = false;
       }
       // circleの場合は連続的に目標を更新
@@ -733,7 +911,7 @@ class Goldfish {
         // 次の角度を計算（時計回りまたは反時計回り）
         const nextAngle = currentAngle + (this.direction > 0 ? 0.5 : -0.5);
 
-        // 円周上の次の点を目標に設定
+        // 円周上の次の点を目標に設定（X,Y両方に適用）
         this.targetX = this.p.constrain(
           this.x + circleRadius * Math.cos(nextAngle),
           this.safeMargin,
@@ -744,9 +922,12 @@ class Goldfish {
           this.safeMargin,
           this.p.height - this.safeMargin
         );
+
         // 円を描く方向に応じて方向を決定
         this.targetDirection = Math.cos(nextAngle) > 0 ? 1 : -1;
-        this.targetVerticalAngle = Math.sin(nextAngle) * 0.3; // 上下にも少し傾ける（弱めに）
+        // 上下方向の角度も連動させる
+        this.targetVerticalAngle = Math.sin(nextAngle) * 0.5;
+
         this.isTurning = this.direction !== this.targetDirection;
         this.isVerticalTurning = Math.abs(this.verticalAngle - this.targetVerticalAngle) > 0.1;
       }
@@ -786,13 +967,15 @@ class Goldfish {
       currentSpeed *= 1.3;
     } else if (this.movementType === 'circle') {
       currentSpeed *= 1.2;
+    } else if (this.movementType === 'up' || this.movementType === 'down') {
+      currentSpeed *= 1.2; // 上下の動きも少し速く
     }
 
-    // 次の位置を計算
+    // 次の位置を計算（X,Y両方）
     let nextX = this.p.lerp(this.x, this.targetX, currentSpeed);
     let nextY = this.p.lerp(this.y, this.targetY, currentSpeed);
 
-    // 境界判定
+    // 境界判定（画面外に出ないよう制約）
     if (nextX < this.safeMargin) {
       nextX = this.safeMargin;
       this.targetX = this.p.random(this.p.width * 0.4, this.p.width * 0.8);
@@ -810,13 +993,13 @@ class Goldfish {
     if (nextY < this.safeMargin) {
       nextY = this.safeMargin;
       this.targetY = this.p.random(this.p.height * 0.4, this.p.height * 0.8);
-      this.targetVerticalAngle = -0.3; // 下向きに変更
+      this.targetVerticalAngle = -0.4; // 下向きに変更
       this.isVerticalTurning = true;
       this.hasStartedMoving = false;
     } else if (nextY > this.p.height - this.safeMargin) {
       nextY = this.p.height - this.safeMargin;
       this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.6);
-      this.targetVerticalAngle = 0.3; // 上向きに変更
+      this.targetVerticalAngle = 0.4; // 上向きに変更
       this.isVerticalTurning = true;
       this.hasStartedMoving = false;
     }
@@ -829,7 +1012,7 @@ class Goldfish {
     this.createRipple(ripples);
   }
 
-  // 描画処理（上下方向の角度を考慮）
+  // 描画処理（上下方向の角度と90度回転を考慮）
   draw(time: number) {
     // 尾びれの動きを計算
     let tailAngle = this.p.sin(time * this.tailWaveSpeed + this.phaseOffset) * 0.7;
@@ -841,10 +1024,15 @@ class Goldfish {
       tailAngle += turnEffect * Math.sin(time * 8) * turningProgress;
     }
 
-    // 上下の動きでも尾びれを強調（弱めに）
-    if (this.isVerticalTurning) {
-      const verticalTurningProgress = Math.abs(this.verticalAngle - this.targetVerticalAngle);
-      tailAngle += this.verticalAngle * Math.sin(time * 6) * verticalTurningProgress * 0.5;
+    // 上下の動きでも尾びれを強調
+    if (this.isVerticalTurning || this.isFlipping) {
+      // 90度回転中は特に強い尾びれの動き
+      if (this.isFlipping) {
+        tailAngle += this.flipDirection * Math.sin(time * 10) * 0.8;
+      } else {
+        const verticalTurningProgress = Math.abs(this.verticalAngle - this.targetVerticalAngle);
+        tailAngle += this.verticalAngle * Math.sin(time * 6) * verticalTurningProgress * 0.5;
+      }
     }
 
     // 速度に応じて尾びれの動きを調整
@@ -856,21 +1044,40 @@ class Goldfish {
 
     tailAngle *= Math.min(speedFactor, 1.8);
 
-    // 全体を一つのpush/popで囲む（これが重要）
+    // 全体を一つのpush/popで囲む（胸びれが離れないようにするため）
     this.p.push();
     this.p.translate(this.x, this.y);
 
     // まず左右の向きを適用
     this.p.scale(this.direction, 1);
 
-    // 次に上下の角度を適用（弱めの回転）
-    this.p.rotate(this.verticalAngle * 0.2);
+    // 次に上下の角度を適用（90度回転も含めて）
+    this.p.rotate(this.verticalAngle);
 
-    // ここで全ての部品を描画（胸びれが離れないよう、個別の変換ではなく共通の変換を適用）
+    // ここで全ての部品を描画
     drawTailFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
     drawBody(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
-    drawRightFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
-    drawLeftFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
+
+    // 90度回転中は胸びれの動きを強調
+    if (this.isFlipping) {
+      // 回転方向に応じて胸びれの動きを強調
+      const finWaveMultiplier = Math.sin(time * 8) * 0.3;
+
+      // 左右の胸びれを個別に回転させて動きを強調
+      this.p.push();
+      this.p.rotate(this.flipDirection * finWaveMultiplier);
+      drawRightFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
+      this.p.pop();
+
+      this.p.push();
+      this.p.rotate(-this.flipDirection * finWaveMultiplier);
+      drawLeftFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
+      this.p.pop();
+    } else {
+      // 通常時は通常通り描画
+      drawRightFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
+      drawLeftFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
+    }
 
     this.p.pop();
   }
