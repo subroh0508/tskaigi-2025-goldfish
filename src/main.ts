@@ -1057,27 +1057,8 @@ class Goldfish {
     // ここで全ての部品を描画
     drawTailFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
     drawBody(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
-
-    // 90度回転中は胸びれの動きを強調
-    if (this.isFlipping) {
-      // 回転方向に応じて胸びれの動きを強調
-      const finWaveMultiplier = Math.sin(time * 8) * 0.3;
-
-      // 左右の胸びれを個別に回転させて動きを強調
-      this.p.push();
-      this.p.rotate(this.flipDirection * finWaveMultiplier);
-      drawRightFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
-      this.p.pop();
-
-      this.p.push();
-      this.p.rotate(-this.flipDirection * finWaveMultiplier);
-      drawLeftFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
-      this.p.pop();
-    } else {
-      // 通常時は通常通り描画
-      drawRightFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
-      drawLeftFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
-    }
+    drawRightFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
+    drawLeftFin(this.p, 0, 0, this.size, 1, tailAngle, this.colorScheme);
 
     this.p.pop();
   }
