@@ -12,6 +12,10 @@ const drawBody = (p: p5, x: number, y: number, size: number, direction: number, 
   
   p.scale((direction * size) / 1000, size / 1000);
   
+  // 輪郭線の色を赤に設定（胴体の色に合わせる）
+  p.stroke(237, 81, 81);
+  p.strokeWeight(1);
+  
   // 胴体のグラデーション
   const bodyGradient = p.drawingContext as CanvasRenderingContext2D;
   const gradient = bodyGradient.createLinearGradient(970, 120, 890, 190);
@@ -81,6 +85,10 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
   
   p.scale((direction * size) / 1000, size / 1000);
   
+  // 輪郭線の色を赤に設定（尾びれの色に合わせる）
+  p.stroke(237, 81, 81);
+  p.strokeWeight(1);
+  
   // 尾びれのグラデーション
   const tailGradient = p.drawingContext as CanvasRenderingContext2D;
   const gradient = tailGradient.createLinearGradient(800, 100, 900, 150);
@@ -149,6 +157,10 @@ const drawRightFin = (p: p5, x: number, y: number, size: number, direction: numb
   
   p.scale((direction * size) / 1000, size / 1000);
   
+  // 輪郭線の色を赤に設定（ひれの色に合わせる）
+  p.stroke(237, 81, 81);
+  p.strokeWeight(1);
+  
   // 右胸びれのグラデーション
   const rightFinGradient = p.drawingContext as CanvasRenderingContext2D;
   const gradient = rightFinGradient.createLinearGradient(950, 90, 970, 120);
@@ -184,6 +196,10 @@ const drawLeftFin = (p: p5, x: number, y: number, size: number, direction: numbe
   p.translate(finOffsetX, finOffsetY);
   
   p.scale((direction * size) / 1000, size / 1000);
+  
+  // 輪郭線の色を赤に設定（ひれの色に合わせる）
+  p.stroke(237, 81, 81);
+  p.strokeWeight(1);
   
   // 左胸びれのグラデーション
   const leftFinGradient = p.drawingContext as CanvasRenderingContext2D;
