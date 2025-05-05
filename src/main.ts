@@ -16,66 +16,66 @@ interface GoldfishColors {
   };
 }
 
-// 5色の金魚の色情報
+// 5色の金魚の色情報 - SVGファイルから抽出した正確な色情報
 const goldfishColorSchemes: GoldfishColors[] = [
-  // 赤い金魚
+  // 赤い金魚 (red.svg)
   {
     stroke: [237, 81, 81],
     fill: [237, 81, 81],
     tailGradient: {
-      start: [237, 81, 81],
-      stop1: [242, 121, 136],
-      stop2: [245, 152, 184],
-      stop3: [248, 183, 217],
-      end: [251, 215, 235]
+      start: [237, 81, 81],    // #ED5151
+      stop1: [239, 104, 119],  // #EF6877
+      stop2: [246, 168, 221],  // #F6A8DD
+      stop3: [248, 187, 228],  // #F8BBE4
+      end: [255, 255, 255]     // #FFFFFF (白)
     }
   },
-  // 緑の金魚
+  // 緑の金魚 (green.svg)
   {
-    stroke: [81, 237, 81],
-    fill: [81, 237, 81],
+    stroke: [64, 191, 96],    // #40BF60
+    fill: [64, 191, 96],
     tailGradient: {
-      start: [81, 237, 81],
-      stop1: [121, 242, 136],
-      stop2: [152, 245, 184],
-      stop3: [183, 248, 217],
-      end: [215, 251, 235]
+      start: [64, 191, 96],    // #40BF60
+      stop1: [108, 203, 129],  // #6CCB81
+      stop2: [167, 224, 178],  // #A7E0B2
+      stop3: [197, 235, 204],  // #C5EBCC
+      end: [255, 255, 255]     // #FFFFFF (白)
     }
   },
-  // 青い金魚
+  // 青い金魚 (blue.svg)
   {
-    stroke: [81, 81, 237],
-    fill: [81, 81, 237],
+    stroke: [64, 111, 191],   // #406FBF
+    fill: [64, 111, 191],
     tailGradient: {
-      start: [81, 81, 237],
-      stop1: [121, 136, 242],
-      stop2: [152, 184, 245],
-      stop3: [183, 217, 248],
-      end: [215, 235, 251]
+      start: [64, 111, 191],   // #406FBF
+      stop1: [108, 142, 203],  // #6C8ECB
+      stop2: [167, 186, 224],  // #A7BAE0
+      stop3: [197, 209, 235],  // #C5D1EB
+      end: [255, 255, 255]     // #FFFFFF (白)
     }
   },
-  // 黄色の金魚
+  // 黄色の金魚 (yellow.svg)
   {
-    stroke: [237, 237, 81],
-    fill: [237, 237, 81],
+    stroke: [238, 187, 34],    // #EEBB22
+    fill: [238, 187, 34],
     tailGradient: {
-      start: [237, 237, 81],
-      stop1: [242, 242, 121],
-      stop2: [245, 245, 152],
-      stop3: [248, 248, 183],
-      end: [251, 251, 215]
+      start: [238, 187, 34],    // #EEBB22
+      stop1: [241, 199, 77],    // #F1C74D
+      stop2: [246, 221, 149],   // #F6DD95
+      stop3: [248, 231, 182],   // #F8E7B6
+      end: [255, 255, 255]      // #FFFFFF (白)
     }
   },
-  // 紫の金魚
+  // 紫の金魚 (purple.svg)
   {
-    stroke: [176, 81, 237],
-    fill: [176, 81, 237],
+    stroke: [159, 64, 191],    // #9F40BF
+    fill: [159, 64, 191],
     tailGradient: {
-      start: [176, 81, 237],
-      stop1: [200, 121, 242],
-      stop2: [213, 152, 245],
-      stop3: [228, 183, 248],
-      end: [240, 215, 251]
+      start: [159, 64, 191],    // #9F40BF
+      stop1: [180, 108, 203],   // #B46CCB
+      stop2: [211, 167, 224],   // #D3A7E0
+      stop3: [226, 197, 235],   // #E2C5EB
+      end: [255, 255, 255]      // #FFFFFF (白)
     }
   }
 ];
@@ -125,14 +125,14 @@ const drawTailFin = (
     255
   ).toString());
   
-  gradient.addColorStop(0.6, p.color(
+  gradient.addColorStop(0.64, p.color(
     colors.tailGradient.stop2[0], 
     colors.tailGradient.stop2[1], 
     colors.tailGradient.stop2[2], 
     255
   ).toString());
   
-  gradient.addColorStop(0.8, p.color(
+  gradient.addColorStop(0.84, p.color(
     colors.tailGradient.stop3[0], 
     colors.tailGradient.stop3[1], 
     colors.tailGradient.stop3[2], 
