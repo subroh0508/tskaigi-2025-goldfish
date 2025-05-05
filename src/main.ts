@@ -180,7 +180,7 @@ const drawBody = (p: p5, x: number, y: number, size: number, direction: number, 
   p.pop();
 };
 
-// 右胸びれを描画する関数
+// 右胸びれを描画する関数 - グラデーションを単色に変更
 const drawRightFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
   p.push();
   p.translate(x, y);
@@ -196,18 +196,10 @@ const drawRightFin = (p: p5, x: number, y: number, size: number, direction: numb
   p.stroke(237, 81, 81);
   p.strokeWeight(1);
   
-  // 右胸びれのグラデーション
-  const rightFinGradient = p.drawingContext as CanvasRenderingContext2D;
-  const gradient = rightFinGradient.createLinearGradient(950, 90, 970, 120);
-  gradient.addColorStop(0, p.color(237, 81, 81, 255).toString());
-  gradient.addColorStop(0.3, p.color(239, 104, 119, 255).toString());
-  gradient.addColorStop(0.64, p.color(246, 168, 221, 255).toString());
-  gradient.addColorStop(0.84, p.color(248, 187, 228, 255).toString());
-  gradient.addColorStop(1, p.color(255, 255, 255, 255).toString());
+  // グラデーションの代わりに単色の赤を使用
+  p.fill(237, 81, 81); // 単色の濃い赤
   
-  rightFinGradient.fillStyle = gradient;
-  
-  // 右胸びれのポイント（SVGから抽出）
+  // 右胸びれのポイント（SVGから抽出）- 形状は変更しない
   p.beginShape();
   p.vertex(951.801, 113.922);
   p.vertex(948.199, 89.774);
@@ -220,7 +212,7 @@ const drawRightFin = (p: p5, x: number, y: number, size: number, direction: numb
   p.pop();
 };
 
-// 左胸びれを描画する関数
+// 左胸びれを描画する関数 - グラデーションを単色に変更
 const drawLeftFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
   p.push();
   p.translate(x, y);
@@ -236,18 +228,10 @@ const drawLeftFin = (p: p5, x: number, y: number, size: number, direction: numbe
   p.stroke(237, 81, 81);
   p.strokeWeight(1);
   
-  // 左胸びれのグラデーション
-  const leftFinGradient = p.drawingContext as CanvasRenderingContext2D;
-  const gradient = leftFinGradient.createLinearGradient(900, 190, 890, 220);
-  gradient.addColorStop(0, p.color(237, 81, 81, 255).toString());
-  gradient.addColorStop(0.3, p.color(239, 104, 119, 255).toString());
-  gradient.addColorStop(0.64, p.color(246, 168, 221, 255).toString());
-  gradient.addColorStop(0.84, p.color(248, 187, 228, 255).toString());
-  gradient.addColorStop(1, p.color(255, 255, 255, 255).toString());
+  // グラデーションの代わりに単色の赤を使用
+  p.fill(237, 81, 81); // 単色の濃い赤
   
-  leftFinGradient.fillStyle = gradient;
-  
-  // 左胸びれのポイント（SVGから抽出）
+  // 左胸びれのポイント（SVGから抽出）- 形状は変更しない
   p.beginShape();
   p.vertex(922.452, 197.381);
   p.vertex(902.603, 222.784);
