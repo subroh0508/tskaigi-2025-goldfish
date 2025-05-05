@@ -1,7 +1,95 @@
 import p5 from 'p5';
 
-// 尾びれを描画する関数 - グラデーションを修正
-const drawTailFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+// 金魚の色定義インターフェース
+interface GoldfishColors {
+  // 体やひれの輪郭線の色
+  stroke: [number, number, number];
+  // 体やひれの内部の色
+  fill: [number, number, number];
+  // 尾びれのグラデーション色
+  tailGradient: {
+    start: [number, number, number];
+    stop1: [number, number, number];
+    stop2: [number, number, number];
+    stop3: [number, number, number];
+    end: [number, number, number];
+  };
+}
+
+// 5色の金魚の色情報
+const goldfishColorSchemes: GoldfishColors[] = [
+  // 赤い金魚
+  {
+    stroke: [237, 81, 81],
+    fill: [237, 81, 81],
+    tailGradient: {
+      start: [237, 81, 81],
+      stop1: [242, 121, 136],
+      stop2: [245, 152, 184],
+      stop3: [248, 183, 217],
+      end: [251, 215, 235]
+    }
+  },
+  // 緑の金魚
+  {
+    stroke: [81, 237, 81],
+    fill: [81, 237, 81],
+    tailGradient: {
+      start: [81, 237, 81],
+      stop1: [121, 242, 136],
+      stop2: [152, 245, 184],
+      stop3: [183, 248, 217],
+      end: [215, 251, 235]
+    }
+  },
+  // 青い金魚
+  {
+    stroke: [81, 81, 237],
+    fill: [81, 81, 237],
+    tailGradient: {
+      start: [81, 81, 237],
+      stop1: [121, 136, 242],
+      stop2: [152, 184, 245],
+      stop3: [183, 217, 248],
+      end: [215, 235, 251]
+    }
+  },
+  // 黄色の金魚
+  {
+    stroke: [237, 237, 81],
+    fill: [237, 237, 81],
+    tailGradient: {
+      start: [237, 237, 81],
+      stop1: [242, 242, 121],
+      stop2: [245, 245, 152],
+      stop3: [248, 248, 183],
+      end: [251, 251, 215]
+    }
+  },
+  // 紫の金魚
+  {
+    stroke: [176, 81, 237],
+    fill: [176, 81, 237],
+    tailGradient: {
+      start: [176, 81, 237],
+      stop1: [200, 121, 242],
+      stop2: [213, 152, 245],
+      stop3: [228, 183, 248],
+      end: [240, 215, 251]
+    }
+  }
+];
+
+// 尾びれを描画する関数 - 色を引数で受け取るよう修正
+const drawTailFin = (
+  p: p5, 
+  x: number, 
+  y: number, 
+  size: number, 
+  direction: number, 
+  tailAngle: number, 
+  colors: GoldfishColors
+) => {
   p.push();
   p.translate(x, y);
   
@@ -12,8 +100,8 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
   const pivotX = 890.004; // 胴体との接合点
   const pivotY = 157.419;
   
-  // 輪郭線の色を赤に設定
-  p.stroke(237, 81, 81);
+  // 輪郭線の色を設定
+  p.stroke(colors.stroke[0], colors.stroke[1], colors.stroke[2]);
   p.strokeWeight(1);
   
   // 尾びれのグラデーション - 接合部から先端に向かって薄くなるように設定
@@ -22,12 +110,41 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
   // グラデーションの方向を接合点から先端方向に設定
   const gradient = tailGradient.createLinearGradient(890, 157, 750, 100);
   
-  // 色の順序: 接合部は濃い赤、先端に向かって薄くなる
-  gradient.addColorStop(0, p.color(237, 81, 81, 255).toString()); // 接合部分は濃い赤
-  gradient.addColorStop(0.3, p.color(242, 121, 136, 255).toString());
-  gradient.addColorStop(0.6, p.color(245, 152, 184, 255).toString());
-  gradient.addColorStop(0.8, p.color(248, 183, 217, 255).toString());
-  gradient.addColorStop(1, p.color(251, 215, 235, 255).toString()); // 先端は薄い赤
+  // 色の順序: 接合部は濃い色、先端に向かって薄くなる
+  gradient.addColorStop(0, p.color(
+    colors.tailGradient.start[0], 
+    colors.tailGradient.start[1], 
+    colors.tailGradient.start[2], 
+    255
+  ).toString());
+  
+  gradient.addColorStop(0.3, p.color(
+    colors.tailGradient.stop1[0], 
+    colors.tailGradient.stop1[1], 
+    colors.tailGradient.stop1[2], 
+    255
+  ).toString());
+  
+  gradient.addColorStop(0.6, p.color(
+    colors.tailGradient.stop2[0], 
+    colors.tailGradient.stop2[1], 
+    colors.tailGradient.stop2[2], 
+    255
+  ).toString());
+  
+  gradient.addColorStop(0.8, p.color(
+    colors.tailGradient.stop3[0], 
+    colors.tailGradient.stop3[1], 
+    colors.tailGradient.stop3[2], 
+    255
+  ).toString());
+  
+  gradient.addColorStop(1, p.color(
+    colors.tailGradient.end[0], 
+    colors.tailGradient.end[1], 
+    colors.tailGradient.end[2], 
+    255
+  ).toString());
   
   tailGradient.fillStyle = gradient;
   
@@ -35,7 +152,7 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
   p.beginShape();
   p.vertex(pivotX, pivotY);
   
-  // 尾びれの各ポイント
+  // 尾びれの各ポイント（変更なし）
   const tailPoints = [
     [814.976, 185.631],
     [771.909, 161.867],
@@ -114,26 +231,34 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
   p.pop();
 };
 
-// 胴体を描画する関数 - 単色の赤に変更
-const drawBody = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+// 胴体を描画する関数 - 色を引数で受け取るよう修正
+const drawBody = (
+  p: p5, 
+  x: number, 
+  y: number, 
+  size: number, 
+  direction: number, 
+  tailAngle: number, 
+  colors: GoldfishColors
+) => {
   p.push();
   p.translate(x, y);
   
-  // 体の動きに合わせて少し揺らす
+  // 体の動きに合わせて少し揺らす（変更なし）
   const bodyOffsetX = p.sin(tailAngle * 0.5) * 3;
   const bodyOffsetY = p.cos(tailAngle * 0.3) * 2;
   p.translate(bodyOffsetX, bodyOffsetY);
   
   p.scale((direction * size) / 1000, size / 1000);
   
-  // 輪郭線の色を赤に設定
-  p.stroke(237, 81, 81);
+  // 輪郭線の色を設定
+  p.stroke(colors.stroke[0], colors.stroke[1], colors.stroke[2]);
   p.strokeWeight(1);
   
-  // 胴体を単色の赤で塗る
-  p.fill(237, 81, 81); // 濃い赤色
+  // 胴体を単色で塗る
+  p.fill(colors.fill[0], colors.fill[1], colors.fill[2]);
   
-  // 胴体のポイント（SVGから抽出）
+  // 胴体のポイント（SVGから抽出）- 変更なし
   p.beginShape();
   p.vertex(910.206, 117.274);
   p.vertex(922.338, 109.492);
@@ -180,24 +305,32 @@ const drawBody = (p: p5, x: number, y: number, size: number, direction: number, 
   p.pop();
 };
 
-// 右胸びれを描画する関数 - グラデーションを単色に変更
-const drawRightFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+// 右胸びれを描画する関数 - 色を引数で受け取るよう修正
+const drawRightFin = (
+  p: p5, 
+  x: number, 
+  y: number, 
+  size: number, 
+  direction: number, 
+  tailAngle: number, 
+  colors: GoldfishColors
+) => {
   p.push();
   p.translate(x, y);
   
-  // びれの動きを尾の動きと連動
+  // びれの動きを尾の動きと連動（変更なし）
   const finOffsetX = p.sin(tailAngle * 0.5) * 3;
   const finOffsetY = p.cos(tailAngle * 0.3) * 2;
   p.translate(finOffsetX, finOffsetY);
   
   p.scale((direction * size) / 1000, size / 1000);
   
-  // 輪郭線の色を赤に設定（ひれの色に合わせる）
-  p.stroke(237, 81, 81);
+  // 輪郭線の色を設定
+  p.stroke(colors.stroke[0], colors.stroke[1], colors.stroke[2]);
   p.strokeWeight(1);
   
-  // グラデーションの代わりに単色の赤を使用
-  p.fill(237, 81, 81); // 単色の濃い赤
+  // ひれの色を設定
+  p.fill(colors.fill[0], colors.fill[1], colors.fill[2]);
   
   // 右胸びれのポイント（SVGから抽出）- 形状は変更しない
   p.beginShape();
@@ -212,24 +345,32 @@ const drawRightFin = (p: p5, x: number, y: number, size: number, direction: numb
   p.pop();
 };
 
-// 左胸びれを描画する関数 - グラデーションを単色に変更
-const drawLeftFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+// 左胸びれを描画する関数 - 色を引数で受け取るよう修正
+const drawLeftFin = (
+  p: p5, 
+  x: number, 
+  y: number, 
+  size: number, 
+  direction: number, 
+  tailAngle: number, 
+  colors: GoldfishColors
+) => {
   p.push();
   p.translate(x, y);
   
-  // びれの動きを尾の動きと連動
+  // びれの動きを尾の動きと連動（変更なし）
   const finOffsetX = p.sin(tailAngle * 0.5) * 3;
   const finOffsetY = p.cos(tailAngle * 0.3) * 2;
   p.translate(finOffsetX, finOffsetY);
   
   p.scale((direction * size) / 1000, size / 1000);
   
-  // 輪郭線の色を赤に設定（ひれの色に合わせる）
-  p.stroke(237, 81, 81);
+  // 輪郭線の色を設定
+  p.stroke(colors.stroke[0], colors.stroke[1], colors.stroke[2]);
   p.strokeWeight(1);
   
-  // グラデーションの代わりに単色の赤を使用
-  p.fill(237, 81, 81); // 単色の濃い赤
+  // ひれの色を設定
+  p.fill(colors.fill[0], colors.fill[1], colors.fill[2]);
   
   // 左胸びれのポイント（SVGから抽出）- 形状は変更しない
   p.beginShape();
@@ -244,19 +385,27 @@ const drawLeftFin = (p: p5, x: number, y: number, size: number, direction: numbe
   p.pop();
 };
 
-// 金魚を描画するメイン関数
-const drawGoldfish = (p: p5, x: number, y: number, size: number, tailAngle: number, direction: number) => {
+// 金魚を描画するメイン関数 - 色を引数で受け取るよう修正
+const drawGoldfish = (
+  p: p5, 
+  x: number, 
+  y: number, 
+  size: number, 
+  tailAngle: number, 
+  direction: number, 
+  colors: GoldfishColors
+) => {
   // 描画順序: 尾びれ→胴体→胸びれ
   // 尾びれは最も背面のレイヤー
-  drawTailFin(p, x, y, size, direction, tailAngle);
+  drawTailFin(p, x, y, size, direction, tailAngle, colors);
   // 次に胴体
-  drawBody(p, x, y, size, direction, tailAngle);
+  drawBody(p, x, y, size, direction, tailAngle, colors);
   // 胸びれは最前面に
-  drawRightFin(p, x, y, size, direction, tailAngle);
-  drawLeftFin(p, x, y, size, direction, tailAngle);
+  drawRightFin(p, x, y, size, direction, tailAngle, colors);
+  drawLeftFin(p, x, y, size, direction, tailAngle, colors);
 };
 
-// 金魚のクラス
+// 金魚のクラス - 色情報を追加
 class Goldfish {
   p: p5;
   x: number;
@@ -271,8 +420,17 @@ class Goldfish {
   phaseOffset: number;
   isTurning: boolean;
   tailWaveSpeed: number;
+  colorScheme: GoldfishColors; // 色情報を追加
 
-  constructor(p: p5, x: number, y: number, size: number, direction: number, phaseOffset: number = 0) {
+  constructor(
+    p: p5, 
+    x: number, 
+    y: number, 
+    size: number, 
+    direction: number, 
+    colorIndex: number, // 色のインデックスを追加
+    phaseOffset: number = 0
+  ) {
     this.p = p;
     this.x = x;
     this.y = y;
@@ -286,6 +444,12 @@ class Goldfish {
     this.phaseOffset = phaseOffset;
     this.isTurning = false;
     this.tailWaveSpeed = p.random(3, 4.5); // 尾びれの揺れの速さをより自然に調整
+    
+    // 色スキームを設定（インデックスが範囲外の場合は0にする）
+    const validColorIndex = colorIndex >= 0 && colorIndex < goldfishColorSchemes.length 
+      ? colorIndex 
+      : 0;
+    this.colorScheme = goldfishColorSchemes[validColorIndex];
 
     // 時々新しい目標地点を設定
     setInterval(() => {
@@ -293,6 +457,7 @@ class Goldfish {
     }, p.random(3000, 8000));
   }
 
+  // 以下のメソッドは変更なし
   newTarget() {
     // 画面内の新しいランダムな目標位置を設定
     this.targetX = this.p.random(this.size, this.p.width - this.size);
@@ -388,8 +553,8 @@ class Goldfish {
 
     tailAngle *= Math.min(speedFactor, 1.8); // 最大値を制限
 
-    // 金魚を描画
-    drawGoldfish(this.p, this.x, this.y, this.size, tailAngle, this.direction);
+    // 金魚を描画（色情報を渡す）
+    drawGoldfish(this.p, this.x, this.y, this.size, tailAngle, this.direction, this.colorScheme);
   }
 }
 
@@ -401,11 +566,13 @@ const sketch = (p: p5) => {
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight);
 
-    // 金魚を初期化（大きさや位置を変えた複数の金魚）
+    // 5匹の金魚を初期化（異なる色、大きさ、位置）
     goldfishes = [
-      new Goldfish(p, p.width/2, p.height/2, 400, 1, 0),
-      new Goldfish(p, p.width*0.3, p.height*0.7, 250, -1, 2),
-      new Goldfish(p, p.width*0.7, p.height*0.3, 200, 1, 4)
+      new Goldfish(p, p.width * 0.5, p.height * 0.5, 400, 1, 0, 0),      // 赤い金魚
+      new Goldfish(p, p.width * 0.3, p.height * 0.7, 250, -1, 1, 2),     // 緑の金魚
+      new Goldfish(p, p.width * 0.7, p.height * 0.3, 200, 1, 2, 4),      // 青い金魚
+      new Goldfish(p, p.width * 0.2, p.height * 0.4, 300, -1, 3, 1),     // 黄色の金魚
+      new Goldfish(p, p.width * 0.8, p.height * 0.6, 350, 1, 4, 3)       // 紫の金魚
     ];
   };
 
