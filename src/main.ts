@@ -1,80 +1,6 @@
 import p5 from 'p5';
 
-// 胴体部分を描画する関数
-const drawBody = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
-  p.push();
-  p.translate(x, y);
-  
-  // 体の動きに合わせて少し揺らす
-  const bodyOffsetX = p.sin(tailAngle * 0.5) * 3;
-  const bodyOffsetY = p.cos(tailAngle * 0.3) * 2;
-  p.translate(bodyOffsetX, bodyOffsetY);
-  
-  p.scale((direction * size) / 1000, size / 1000);
-  
-  // 輪郭線の色を赤に設定（胴体の色に合わせる）
-  p.stroke(237, 81, 81);
-  p.strokeWeight(1);
-  
-  // 胴体のグラデーション
-  const bodyGradient = p.drawingContext as CanvasRenderingContext2D;
-  const gradient = bodyGradient.createLinearGradient(970, 120, 890, 190);
-  gradient.addColorStop(0, p.color(237, 81, 81, 255).toString());
-  gradient.addColorStop(0.3, p.color(239, 104, 119, 255).toString());
-  gradient.addColorStop(0.64, p.color(246, 168, 221, 255).toString());
-  gradient.addColorStop(0.84, p.color(248, 187, 228, 255).toString());
-  gradient.addColorStop(1, p.color(255, 255, 255, 255).toString());
-  
-  bodyGradient.fillStyle = gradient;
-  
-  // 胴体のポイント（SVGから抽出）
-  p.beginShape();
-  p.vertex(910.206, 117.274);
-  p.vertex(922.338, 109.492);
-  p.vertex(937.938, 107.867);
-  p.vertex(951.801, 113.922);
-  p.vertex(956.0, 117.0);
-  p.vertex(960.5, 120.0);
-  p.vertex(965.647, 122.736);
-  p.vertex(978.967, 133.189);
-  p.vertex(995.079, 149.501);
-  p.vertex(1000.04, 154.882);
-  p.vertex(1002.57, 153.858);
-  p.vertex(1007.24, 156.978);
-  p.vertex(1010.82, 162.204);
-  p.vertex(1014.37, 167.372);
-  p.vertex(1015.6, 172.789);
-  p.vertex(1013.83, 174.832);
-  p.vertex(1016.77, 182.106);
-  p.vertex(1017.1, 189.661);
-  p.vertex(1012.83, 197.45);
-  p.vertex(1008.64, 205.096);
-  p.vertex(1002.43, 209.189);
-  p.vertex(994.98, 210.824);
-  p.vertex(993.494, 213.003);
-  p.vertex(988.712, 214.485);
-  p.vertex(983.103, 214.302);
-  p.vertex(977.313, 214.114);
-  p.vertex(972.518, 212.212);
-  p.vertex(971.358, 209.838);
-  p.vertex(971.181, 209.798);
-  p.vertex(971.003, 209.758);
-  p.vertex(970.825, 209.718);
-  p.vertex(964.438, 208.267);
-  p.vertex(939.159, 203.353);
-  p.vertex(922.452, 197.381);
-  p.vertex(917.0, 195.0);
-  p.vertex(912.0, 192.5);
-  p.vertex(908.145, 190.272);
-  p.vertex(897.281, 182.4);
-  p.vertex(890.873, 170.214);
-  p.vertex(890.004, 157.419); // 尾びれとの接合点を厳密に一致させる
-  p.endShape(p.CLOSE);
-  
-  p.pop();
-};
-
-// 尾びれを描画する関数
+// 尾びれを描画する関数 - グラデーションを修正
 const drawTailFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
   p.push();
   p.translate(x, y);
@@ -90,21 +16,23 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
   p.stroke(237, 81, 81);
   p.strokeWeight(1);
   
-  // 尾びれのグラデーション
+  // 尾びれのグラデーション - 接合部から先端に向かって薄くなるように設定
   const tailGradient = p.drawingContext as CanvasRenderingContext2D;
-  const gradient = tailGradient.createLinearGradient(800, 100, 900, 150);
-  gradient.addColorStop(0, p.color(237, 81, 81, 255).toString());
-  gradient.addColorStop(0.3, p.color(239, 104, 119, 255).toString());
-  gradient.addColorStop(0.64, p.color(246, 168, 221, 255).toString());
-  gradient.addColorStop(0.84, p.color(248, 187, 228, 255).toString());
-  gradient.addColorStop(1, p.color(255, 255, 255, 255).toString());
+  
+  // グラデーションの方向を接合点から先端方向に設定
+  const gradient = tailGradient.createLinearGradient(890, 157, 750, 100);
+  
+  // 色の順序: 接合部は濃い赤、先端に向かって薄くなる
+  gradient.addColorStop(0, p.color(237, 81, 81, 255).toString()); // 接合部分は濃い赤
+  gradient.addColorStop(0.3, p.color(242, 121, 136, 255).toString());
+  gradient.addColorStop(0.6, p.color(245, 152, 184, 255).toString());
+  gradient.addColorStop(0.8, p.color(248, 183, 217, 255).toString());
+  gradient.addColorStop(1, p.color(251, 215, 235, 255).toString()); // 先端は薄い赤
   
   tailGradient.fillStyle = gradient;
   
-  // 尾びれのポイント
+  // 尾びれのポイント描画（変更なし）
   p.beginShape();
-  
-  // 接合点のポイント（動かさない）
   p.vertex(pivotX, pivotY);
   
   // 尾びれの各ポイント
@@ -148,7 +76,7 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
     [910.206, 117.274]
   ];
   
-  // 各ポイントに変形を適用
+  // 各ポイントに変形を適用（変更なし）
   for (const point of tailPoints) {
     // 接合点からの距離を計算
     const dx = point[0] - pivotX;
@@ -185,6 +113,258 @@ const drawTailFin = (p: p5, x: number, y: number, size: number, direction: numbe
   p.endShape(p.CLOSE);
   p.pop();
 };
+
+// 胴体を描画する関数 - 単色の赤に変更
+const drawBody = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+  p.push();
+  p.translate(x, y);
+  
+  // 体の動きに合わせて少し揺らす
+  const bodyOffsetX = p.sin(tailAngle * 0.5) * 3;
+  const bodyOffsetY = p.cos(tailAngle * 0.3) * 2;
+  p.translate(bodyOffsetX, bodyOffsetY);
+  
+  p.scale((direction * size) / 1000, size / 1000);
+  
+  // 輪郭線の色を赤に設定
+  p.stroke(237, 81, 81);
+  p.strokeWeight(1);
+  
+  // 胴体を単色の赤で塗る
+  p.fill(237, 81, 81); // 濃い赤色
+  
+  // 胴体のポイント（SVGから抽出）
+  p.beginShape();
+  p.vertex(910.206, 117.274);
+  p.vertex(922.338, 109.492);
+  p.vertex(937.938, 107.867);
+  p.vertex(951.801, 113.922);
+  p.vertex(956.0, 117.0);
+  p.vertex(960.5, 120.0);
+  p.vertex(965.647, 122.736);
+  p.vertex(978.967, 133.189);
+  p.vertex(995.079, 149.501);
+  p.vertex(1000.04, 154.882);
+  p.vertex(1002.57, 153.858);
+  p.vertex(1007.24, 156.978);
+  p.vertex(1010.82, 162.204);
+  p.vertex(1014.37, 167.372);
+  p.vertex(1015.6, 172.789);
+  p.vertex(1013.83, 174.832);
+  p.vertex(1016.77, 182.106);
+  p.vertex(1017.1, 189.661);
+  p.vertex(1012.83, 197.45);
+  p.vertex(1008.64, 205.096);
+  p.vertex(1002.43, 209.189);
+  p.vertex(994.98, 210.824);
+  p.vertex(993.494, 213.003);
+  p.vertex(988.712, 214.485);
+  p.vertex(983.103, 214.302);
+  p.vertex(977.313, 214.114);
+  p.vertex(972.518, 212.212);
+  p.vertex(971.358, 209.838);
+  p.vertex(971.181, 209.798);
+  p.vertex(971.003, 209.758);
+  p.vertex(970.825, 209.718);
+  p.vertex(964.438, 208.267);
+  p.vertex(939.159, 203.353);
+  p.vertex(922.452, 197.381);
+  p.vertex(917.0, 195.0);
+  p.vertex(912.0, 192.5);
+  p.vertex(908.145, 190.272);
+  p.vertex(897.281, 182.4);
+  p.vertex(890.873, 170.214);
+  p.vertex(890.004, 157.419); // 尾びれとの接合点
+  p.endShape(p.CLOSE);
+  
+  p.pop();
+};
+
+// 尾びれを描画する関数
+// const drawTailFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+//   p.push();
+//   p.translate(x, y);
+  
+//   // スケーリングを先に適用
+//   p.scale((direction * size) / 1000, size / 1000);
+  
+//   // 胴体との接合点を基準に設定
+//   const pivotX = 890.004; // 胴体との接合点
+//   const pivotY = 157.419;
+  
+//   // 輪郭線の色を赤に設定
+//   p.stroke(237, 81, 81);
+//   p.strokeWeight(1);
+  
+//   // 尾びれのグラデーション
+//   const tailGradient = p.drawingContext as CanvasRenderingContext2D;
+//   const gradient = tailGradient.createLinearGradient(800, 100, 900, 150);
+//   gradient.addColorStop(0, p.color(237, 81, 81, 255).toString());
+//   gradient.addColorStop(0.3, p.color(239, 104, 119, 255).toString());
+//   gradient.addColorStop(0.64, p.color(246, 168, 221, 255).toString());
+//   gradient.addColorStop(0.84, p.color(248, 187, 228, 255).toString());
+//   gradient.addColorStop(1, p.color(255, 255, 255, 255).toString());
+  
+//   tailGradient.fillStyle = gradient;
+  
+//   // 尾びれのポイント
+//   p.beginShape();
+  
+//   // 接合点のポイント（動かさない）
+//   p.vertex(pivotX, pivotY);
+  
+//   // 尾びれの各ポイント
+//   const tailPoints = [
+//     [814.976, 185.631],
+//     [771.909, 161.867],
+//     [770.452, 161.233],
+//     [781.503, 157.209],
+//     [781.198, 156.457],
+//     [797.552, 152.503],
+//     [788.409, 146.179],
+//     [790.701, 142.914],
+//     [796.435, 141.095],
+//     [787.894, 130.726],
+//     [787.814, 130.629],
+//     [777.753, 123.826],
+//     [790.151, 117.351],
+//     [804.588, 109.812],
+//     [825.205, 116.468],
+//     [853.445, 125.119],
+//     [842.439, 117.101],
+//     [830.823, 106.324],
+//     [812.122, 95.282],
+//     [761.274, 65.258],
+//     [718.828, 94.522],
+//     [705.022, 102.241],
+//     [733.686, 79.71],
+//     [737.701, 77.332],
+//     [780.962, 72.119],
+//     [754.5, 64.541],
+//     [750.854, 64.962],
+//     [702.517, 69.802],
+//     [702.567, 69.741],
+//     [718.829, 40.534],
+//     [762.159, 37.332],
+//     [770.489, 36.716],
+//     [813.308, 34.634],
+//     [850.541, 61.166],
+//     [880.577, 82.57],
+//     [885.404, 94.639],
+//     [910.206, 117.274]
+//   ];
+  
+//   // 各ポイントに変形を適用
+//   for (const point of tailPoints) {
+//     // 接合点からの距離を計算
+//     const dx = point[0] - pivotX;
+//     const dy = point[1] - pivotY;
+//     const distance = Math.sqrt(dx * dx + dy * dy);
+    
+//     // 左右方向のベクトルを計算（金魚の向きに垂直な方向）
+//     // direction > 0 なら右向き、< 0 なら左向き
+//     // 従って左右の振動方向は金魚の向きに対して垂直
+//     const sideDirectionX = -dy * direction; // 垂直方向ベクトルのX成分
+//     const sideDirectionY = dx * direction;  // 垂直方向ベクトルのY成分
+    
+//     // 単位ベクトル化
+//     const sideMagnitude = Math.sqrt(sideDirectionX * sideDirectionX + sideDirectionY * sideDirectionY);
+//     const unitSideX = sideDirectionX / sideMagnitude;
+//     const unitSideY = sideDirectionY / sideMagnitude;
+    
+//     // 距離が遠いほど変形が大きくなるようにする
+//     const maxDistance = 200;
+//     const normalizedDist = Math.min(distance / maxDistance, 1);
+//     const influence = normalizedDist * normalizedDist * 1.8; // 二次関数的な影響度、さらに強調
+    
+//     // サイン波による横方向（金魚の体に対して垂直方向）の変位
+//     const sideOffset = Math.sin(tailAngle) * influence * distance * 0.35;
+    
+//     // 左右方向の変位を計算
+//     const xOffset = unitSideX * sideOffset;
+//     const yOffset = unitSideY * sideOffset;
+    
+//     // 変形後の座標を計算
+//     p.vertex(point[0] + xOffset, point[1] + yOffset);
+//   }
+  
+//   p.endShape(p.CLOSE);
+//   p.pop();
+// };
+
+// 胴体部分を描画する関数
+// const drawBody = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
+//   p.push();
+//   p.translate(x, y);
+  
+//   // 体の動きに合わせて少し揺らす
+//   const bodyOffsetX = p.sin(tailAngle * 0.5) * 3;
+//   const bodyOffsetY = p.cos(tailAngle * 0.3) * 2;
+//   p.translate(bodyOffsetX, bodyOffsetY);
+  
+//   p.scale((direction * size) / 1000, size / 1000);
+  
+//   // 輪郭線の色を赤に設定（胴体の色に合わせる）
+//   p.stroke(237, 81, 81);
+//   p.strokeWeight(1);
+  
+//   // 胴体のグラデーション
+//   const bodyGradient = p.drawingContext as CanvasRenderingContext2D;
+//   const gradient = bodyGradient.createLinearGradient(970, 120, 890, 190);
+//   gradient.addColorStop(0, p.color(237, 81, 81, 255).toString());
+//   gradient.addColorStop(0.3, p.color(239, 104, 119, 255).toString());
+//   gradient.addColorStop(0.64, p.color(246, 168, 221, 255).toString());
+//   gradient.addColorStop(0.84, p.color(248, 187, 228, 255).toString());
+//   gradient.addColorStop(1, p.color(255, 255, 255, 255).toString());
+  
+//   bodyGradient.fillStyle = gradient;
+  
+//   // 胴体のポイント（SVGから抽出）
+//   p.beginShape();
+//   p.vertex(910.206, 117.274);
+//   p.vertex(922.338, 109.492);
+//   p.vertex(937.938, 107.867);
+//   p.vertex(951.801, 113.922);
+//   p.vertex(956.0, 117.0);
+//   p.vertex(960.5, 120.0);
+//   p.vertex(965.647, 122.736);
+//   p.vertex(978.967, 133.189);
+//   p.vertex(995.079, 149.501);
+//   p.vertex(1000.04, 154.882);
+//   p.vertex(1002.57, 153.858);
+//   p.vertex(1007.24, 156.978);
+//   p.vertex(1010.82, 162.204);
+//   p.vertex(1014.37, 167.372);
+//   p.vertex(1015.6, 172.789);
+//   p.vertex(1013.83, 174.832);
+//   p.vertex(1016.77, 182.106);
+//   p.vertex(1017.1, 189.661);
+//   p.vertex(1012.83, 197.45);
+//   p.vertex(1008.64, 205.096);
+//   p.vertex(1002.43, 209.189);
+//   p.vertex(994.98, 210.824);
+//   p.vertex(993.494, 213.003);
+//   p.vertex(988.712, 214.485);
+//   p.vertex(983.103, 214.302);
+//   p.vertex(977.313, 214.114);
+//   p.vertex(972.518, 212.212);
+//   p.vertex(971.358, 209.838);
+//   p.vertex(971.181, 209.798);
+//   p.vertex(971.003, 209.758);
+//   p.vertex(970.825, 209.718);
+//   p.vertex(964.438, 208.267);
+//   p.vertex(939.159, 203.353);
+//   p.vertex(922.452, 197.381);
+//   p.vertex(917.0, 195.0);
+//   p.vertex(912.0, 192.5);
+//   p.vertex(908.145, 190.272);
+//   p.vertex(897.281, 182.4);
+//   p.vertex(890.873, 170.214);
+//   p.vertex(890.004, 157.419); // 尾びれとの接合点を厳密に一致させる
+//   p.endShape(p.CLOSE);
+  
+//   p.pop();
+// };
 
 // 右胸びれを描画する関数
 const drawRightFin = (p: p5, x: number, y: number, size: number, direction: number, tailAngle: number) => {
@@ -407,7 +587,7 @@ class Goldfish {
       0, this.p.width * 0.3,
       1, 1.8
     );
-    
+
     tailAngle *= Math.min(speedFactor, 1.8); // 最大値を制限
 
     // 金魚を描画
