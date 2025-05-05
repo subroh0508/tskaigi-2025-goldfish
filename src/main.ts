@@ -1,6 +1,6 @@
 import p5 from 'p5';
 
-// 金魚の色定義インターフェース
+// 金魚の色定義インターフェース（変更なし）
 interface GoldfishColors {
   stroke: [number, number, number];
   fill: [number, number, number];
@@ -13,66 +13,66 @@ interface GoldfishColors {
   };
 }
 
-// 5色の金魚の色情報 - SVGファイルの正確な色情報
+// 5色の金魚の色情報（変更なし）
 const goldfishColorSchemes: GoldfishColors[] = [
   // 赤い金魚 (red.svg)
   {
     stroke: [237, 81, 81],
     fill: [237, 81, 81],
     tailGradient: {
-      start: [237, 81, 81],    // #ED5151
-      stop1: [239, 104, 119],  // #EF6877
-      stop2: [246, 168, 221],  // #F6A8DD
-      stop3: [248, 187, 228],  // #F8BBE4
-      end: [255, 255, 255]     // #FFFFFF
+      start: [237, 81, 81],
+      stop1: [239, 104, 119],
+      stop2: [246, 168, 221],
+      stop3: [248, 187, 228],
+      end: [255, 255, 255]
     }
   },
   // 緑の金魚 (green.svg)
   {
-    stroke: [64, 191, 96],    // #40BF60
+    stroke: [64, 191, 96],
     fill: [64, 191, 96],
     tailGradient: {
-      start: [64, 191, 96],    // #40BF60
-      stop1: [108, 203, 129],  // #6CCB81
-      stop2: [167, 224, 178],  // #A7E0B2
-      stop3: [197, 235, 204],  // #C5EBCC
-      end: [255, 255, 255]     // #FFFFFF
+      start: [64, 191, 96],
+      stop1: [108, 203, 129],
+      stop2: [167, 224, 178],
+      stop3: [197, 235, 204],
+      end: [255, 255, 255]
     }
   },
   // 青い金魚 (blue.svg)
   {
-    stroke: [64, 111, 191],   // #406FBF
+    stroke: [64, 111, 191],
     fill: [64, 111, 191],
     tailGradient: {
-      start: [64, 111, 191],   // #406FBF
-      stop1: [108, 142, 203],  // #6C8ECB
-      stop2: [167, 186, 224],  // #A7BAE0
-      stop3: [197, 209, 235],  // #C5D1EB
-      end: [255, 255, 255]     // #FFFFFF
+      start: [64, 111, 191],
+      stop1: [108, 142, 203],
+      stop2: [167, 186, 224],
+      stop3: [197, 209, 235],
+      end: [255, 255, 255]
     }
   },
   // 黄色の金魚 (yellow.svg)
   {
-    stroke: [238, 187, 34],    // #EEBB22
+    stroke: [238, 187, 34],
     fill: [238, 187, 34],
     tailGradient: {
-      start: [238, 187, 34],    // #EEBB22
-      stop1: [241, 199, 77],    // #F1C74D
-      stop2: [246, 221, 149],   // #F6DD95
-      stop3: [248, 231, 182],   // #F8E7B6
-      end: [255, 255, 255]      // #FFFFFF
+      start: [238, 187, 34],
+      stop1: [241, 199, 77],
+      stop2: [246, 221, 149],
+      stop3: [248, 231, 182],
+      end: [255, 255, 255]
     }
   },
   // 紫の金魚 (purple.svg)
   {
-    stroke: [159, 64, 191],    // #9F40BF
+    stroke: [159, 64, 191],
     fill: [159, 64, 191],
     tailGradient: {
-      start: [159, 64, 191],    // #9F40BF
-      stop1: [180, 108, 203],   // #B46CCB
-      stop2: [211, 167, 224],   // #D3A7E0
-      stop3: [226, 197, 235],   // #E2C5EB
-      end: [255, 255, 255]      // #FFFFFF
+      start: [159, 64, 191],
+      stop1: [180, 108, 203],
+      stop2: [211, 167, 224],
+      stop3: [226, 197, 235],
+      end: [255, 255, 255]
     }
   }
 ];
@@ -418,6 +418,8 @@ class Goldfish {
   isTurning: boolean;
   tailWaveSpeed: number;
   colorScheme: GoldfishColors;
+  // 境界判定用の安全マージンを追加
+  safeMargin: number;
 
   constructor(
     p: p5, 
@@ -428,12 +430,18 @@ class Goldfish {
     phaseOffset: number = 0
   ) {
     this.p = p;
-    this.x = x;
-    this.y = y;
-    this.targetX = x;
-    this.targetY = y;
-    // すべての金魚のサイズを統一（元の赤い金魚の1.5倍）
-    this.size = 600; // 元のサイズ400の1.5倍
+    this.size = 600; // 全ての金魚を同じサイズに
+    
+    // 金魚の描画時の実際の幅を考慮したマージン
+    // 金魚の形状を考慮して、サイズの半分よりも大きめに設定
+    this.safeMargin = this.size * 0.6;
+    
+    // 初期位置が安全範囲内に収まるよう制約
+    this.x = p.constrain(x, this.safeMargin, p.width - this.safeMargin);
+    this.y = p.constrain(y, this.safeMargin, p.height - this.safeMargin);
+    
+    this.targetX = this.x;
+    this.targetY = this.y;
     this.direction = direction;
     this.targetDirection = direction;
     this.turningSpeed = 0.1;
@@ -447,15 +455,17 @@ class Goldfish {
       : 0;
     this.colorScheme = goldfishColorSchemes[validColorIndex];
 
+    // 新しい目標地点を設定するタイマー
     setInterval(() => {
       this.newTarget();
     }, p.random(3000, 8000));
   }
 
+  // 新しい目標位置の設定（安全マージンを考慮）
   newTarget() {
-    // 画面内の新しいランダムな目標位置を設定
-    this.targetX = this.p.random(this.size, this.p.width - this.size);
-    this.targetY = this.p.random(this.size, this.p.height - this.size);
+    // 画面内の安全な範囲でランダムな目標位置を設定
+    this.targetX = this.p.random(this.safeMargin, this.p.width - this.safeMargin);
+    this.targetY = this.p.random(this.safeMargin, this.p.height - this.safeMargin);
 
     // 目標地点が現在の位置の左側なら向きを左に、右側なら向きを右に
     if (this.targetX < this.x) {
@@ -470,75 +480,68 @@ class Goldfish {
     }
   }
 
+  // 位置の更新（境界判定を強化）
   update(time: number) {
     // 方向の更新（滑らかに目標の向きに変化）
     if (this.direction !== this.targetDirection) {
-      // 現在の向きから目標の向きへ徐々に変化
       this.direction = this.p.lerp(this.direction, this.targetDirection, this.turningSpeed);
-
-      // 十分に近づいたら完全に目標の向きにする
+      
       if (Math.abs(this.direction - this.targetDirection) < 0.05) {
         this.direction = this.targetDirection;
         this.isTurning = false;
       }
     }
 
-    // 移動速度（方向転換中は少し遅くする）
+    // 移動速度の計算
     const currentSpeed = this.isTurning ? this.speed * 0.7 : this.speed;
 
-    // 目標位置に向かって徐々に移動
-    this.x = this.p.lerp(this.x, this.targetX, currentSpeed);
-    this.y = this.p.lerp(this.y, this.targetY, currentSpeed);
+    // 次の位置を計算
+    let nextX = this.p.lerp(this.x, this.targetX, currentSpeed);
+    let nextY = this.p.lerp(this.y, this.targetY, currentSpeed);
 
-    // 画面端に達した場合は滑らかに跳ね返る
-    if (this.x < this.size * 0.5) {
-      this.x = this.size * 0.5;
-      if (this.targetDirection < 0) {
-        // 目標が画面外の場合、目標を画面内に設定し直す
-        this.targetX = this.p.random(this.p.width * 0.2, this.p.width * 0.8);
-        this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.8);
-        this.targetDirection = 1;
-        this.isTurning = true;
-      }
-    } else if (this.x > this.p.width - this.size * 0.5) {
-      this.x = this.p.width - this.size * 0.5;
-      if (this.targetDirection > 0) {
-        // 目標が画面外の場合、目標を画面内に設定し直す
-        this.targetX = this.p.random(this.p.width * 0.2, this.p.width * 0.8);
-        this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.8);
-        this.targetDirection = -1;
-        this.isTurning = true;
-      }
+    // 境界判定を先に行い、画面外に出る前に方向転換させる
+    if (nextX < this.safeMargin) {
+      // 左端に近づいたら、右方向に方向転換
+      nextX = this.safeMargin;
+      this.targetX = this.p.random(this.p.width * 0.4, this.p.width * 0.8);
+      this.targetDirection = 1;
+      this.isTurning = true;
+    } else if (nextX > this.p.width - this.safeMargin) {
+      // 右端に近づいたら、左方向に方向転換
+      nextX = this.p.width - this.safeMargin;
+      this.targetX = this.p.random(this.p.width * 0.2, this.p.width * 0.6);
+      this.targetDirection = -1;
+      this.isTurning = true;
     }
 
-    if (this.y < this.size * 0.5) {
-      this.y = this.size * 0.5;
-      // Y方向の目標も調整
-      this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.8);
-    } else if (this.y > this.p.height - this.size * 0.5) {
-      this.y = this.p.height - this.size * 0.5;
-      // Y方向の目標も調整
-      this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.8);
+    if (nextY < this.safeMargin) {
+      // 上端に近づいたら、下方向に方向転換
+      nextY = this.safeMargin;
+      this.targetY = this.p.random(this.p.height * 0.4, this.p.height * 0.8);
+    } else if (nextY > this.p.height - this.safeMargin) {
+      // 下端に近づいたら、上方向に方向転換
+      nextY = this.p.height - this.safeMargin;
+      this.targetY = this.p.random(this.p.height * 0.2, this.p.height * 0.6);
     }
+
+    // 更新された位置を適用
+    this.x = nextX;
+    this.y = nextY;
   }
 
+  // 描画処理
   draw(time: number) {
-    // より滑らかな尾びれの動き
+    // 尾びれの動きの計算
     let tailAngle = this.p.sin(time * this.tailWaveSpeed + this.phaseOffset) * 0.7;
 
     // 方向転換中は尾びれの動きを強調
     if (this.isTurning) {
-      // 方向転換の進行度合い（0～1）
       const turningProgress = Math.abs(this.direction - this.targetDirection);
-
-      // 方向転換中は尾びれをより大きく振る（ターンの方向と逆に）
       const turnEffect = (this.targetDirection - this.direction) * 0.8;
-
-      // 通常の尾びれの動きに方向転換の効果を加える
       tailAngle += turnEffect * Math.sin(time * 8) * turningProgress;
     }
 
-    // 速度に応じて尾びれの動きを調整（速く泳ぐほど大きく振る）
+    // 速度に応じて尾びれの動きを調整
     const speedFactor = this.p.map(
       this.p.dist(this.x, this.y, this.targetX, this.targetY),
       0, this.p.width * 0.3,
@@ -547,7 +550,7 @@ class Goldfish {
 
     tailAngle *= Math.min(speedFactor, 1.8); // 最大値を制限
 
-    // 金魚を描画（色情報を渡す）
+    // 金魚を描画
     drawGoldfish(this.p, this.x, this.y, this.size, tailAngle, this.direction, this.colorScheme);
   }
 }
@@ -560,18 +563,42 @@ const sketch = (p: p5) => {
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight);
 
-    // 5匹の金魚を初期化（同じサイズ、異なる色と位置）
+    // 画面サイズに基づいて安全に配置
+    const safeMargin = 600 * 0.6; // 金魚サイズに基づく安全マージン
+    
+    // 画面内の安全な領域に初期位置を設定
     goldfishes = [
-      new Goldfish(p, p.width * 0.5, p.height * 0.5, 1, 0, 0),      // 赤い金魚
-      new Goldfish(p, p.width * 0.3, p.height * 0.7, -1, 1, 2),     // 緑の金魚
-      new Goldfish(p, p.width * 0.7, p.height * 0.3, 1, 2, 4),      // 青い金魚
-      new Goldfish(p, p.width * 0.2, p.height * 0.4, -1, 3, 1),     // 黄色の金魚
-      new Goldfish(p, p.width * 0.8, p.height * 0.6, 1, 4, 3)       // 紫の金魚
+      // 中央
+      new Goldfish(p, p.width * 0.5, p.height * 0.5, 1, 0, 0),
+      
+      // 左上（安全マージンを考慮）
+      new Goldfish(p, 
+        p.random(safeMargin, p.width * 0.4), 
+        p.random(safeMargin, p.height * 0.4), 
+        -1, 1, 2),
+      
+      // 右上
+      new Goldfish(p, 
+        p.random(p.width * 0.6, p.width - safeMargin), 
+        p.random(safeMargin, p.height * 0.4), 
+        1, 2, 4),
+      
+      // 左下
+      new Goldfish(p, 
+        p.random(safeMargin, p.width * 0.4), 
+        p.random(p.height * 0.6, p.height - safeMargin), 
+        -1, 3, 1),
+      
+      // 右下
+      new Goldfish(p, 
+        p.random(p.width * 0.6, p.width - safeMargin), 
+        p.random(p.height * 0.6, p.height - safeMargin), 
+        1, 4, 3)
     ];
   };
 
   p.draw = () => {
-    // 水色の背景（少し透明度を加えて滑らかな動きに）
+    // 水色の背景
     p.background(240, 250, 255, 240);
 
     // 時間を更新
@@ -589,14 +616,20 @@ const sketch = (p: p5) => {
 
     // ウィンドウリサイズ時に金魚の位置を調整
     goldfishes.forEach(fish => {
-      if (fish.x > p.width) fish.x = p.width * 0.8;
-      if (fish.y > p.height) fish.y = p.height * 0.8;
-
-      // 新しい目標地点も設定
-      fish.newTarget();
+      // 画面の新しいサイズに基づいて位置を制約
+      fish.x = p.constrain(fish.x, fish.safeMargin, p.width - fish.safeMargin);
+      fish.y = p.constrain(fish.y, fish.safeMargin, p.height - fish.safeMargin);
+      
+      // 画面が小さくなりすぎた場合は、新しい目標地点も調整
+      if (fish.targetX < fish.safeMargin || 
+          fish.targetX > p.width - fish.safeMargin ||
+          fish.targetY < fish.safeMargin || 
+          fish.targetY > p.height - fish.safeMargin) {
+        fish.newTarget();
+      }
     });
   };
 };
 
-// p5インスタンスを作成し、#appに追加
+// p5インスタンスを作成
 new p5(sketch, document.querySelector<HTMLDivElement>('#app')!);
